@@ -37,7 +37,7 @@ The misses are fun, though. The model thought Kevin Schade (paid about $681K in 
 | `predicting_player_salaries.py` / `Predicting_Player_Salaries.ipynb` | Project 1: MLS base salaries, including the leakage test |
 | `performance_based_salaries.py` / `Performance_Based_Salaries.ipynb` | Project 2: salaries from on-field stats only |
 | `requirements.txt` | Python libraries |
-| `dfAll.csv` (also in `archive.zip`) | Copy of the player stats + wages data |
+| `dfAll.csv` | Copy of the player stats + wages data |
 
 The `.py` files are exported from the Colab notebooks, so they're the same code.
 
