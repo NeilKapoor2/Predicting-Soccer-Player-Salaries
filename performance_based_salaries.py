@@ -200,11 +200,11 @@ print("Linear Regression MSE (Test):", mse_test_lr)
 
 from sklearn.metrics import mean_absolute_error, r2_score
 
-# Calculate Mean Absolute Error
-mae = mean_absolute_error(y_test, predictions)
+# Calculate Mean Absolute Error (Updated to use test_predictions_lr)
+mae = mean_absolute_error(y_test, test_predictions_lr)
 
-# Calculate R² Score
-r2 = r2_score(y_test, predictions)
+# Calculate R² Score (Updated to use test_predictions_lr)
+r2 = r2_score(y_test, test_predictions_lr)
 
 print("Mean Absolute Error:", mae)
 print("R² Score:", r2)
@@ -213,7 +213,7 @@ for i in range(len(X_test)):
     player = df.loc[X_test.index[i], "Player"]
 
     actual = y_test.iloc[i]
-    predicted = predictions[i]
+    predicted = test_predictions_lr[i]  # Updated to use test_predictions_lr
 
     percent_error = abs((actual - predicted) / actual) * 100
 

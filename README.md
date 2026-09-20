@@ -39,7 +39,7 @@ The misses are fun, though. The model thought Kevin Schade (paid about $681K in 
 | `requirements.txt` | Python libraries |
 | `dfAll.csv` (also in `archive.zip`) | Copy of the player stats + wages data |
 
-The `.py` files are exported from the Colab notebooks, so they're the same code. `performance_based_salaries (1).py` is a leftover duplicate download.
+The `.py` files are exported from the Colab notebooks, so they're the same code.
 
 **Data:** [US Major League Soccer Salaries](https://www.kaggle.com/datasets/crawford/us-major-league-soccer-salaries) (5,509 player-seasons after dropping missing values) and [Undervalued Football Players](https://www.kaggle.com/datasets/armaanmartins21/undervalued-football-players) (2,831 rows).
 
