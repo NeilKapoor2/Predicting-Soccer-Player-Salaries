@@ -75,10 +75,6 @@ Or open the notebooks in Jupyter or Google Colab. The scripts download the data 
 
 This started as a soccer question, but the same problem shows up anywhere a number stands in for a person: hiring, rankings, who gets scouted and who gets overlooked. If the number was biased to begin with, a model trained on it will be biased too, just with more confidence. Next I want to try measuring players in a way that doesn't rely on their salary, and see who the numbers have been missing.
 
-## AI note
-
-AI note: I wrote all the code and ran all the experiments myself. I used AI to help draft and edit this README. Every number in it comes from my own notebook outputs.
-
 ## Built with
 
 Python, pandas, NumPy, scikit-learn, and kagglehub.
