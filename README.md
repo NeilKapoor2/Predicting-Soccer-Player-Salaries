@@ -77,7 +77,7 @@ This started as a soccer question, but the same problem shows up anywhere a numb
 
 ## AI note
 
-All of the code in this repo was written by me. I used AI to create and edit my README. The findings and numbers come from my own notebook outputs.
+AI note: I wrote all the code and ran all the experiments myself. I used AI to help draft and edit this README. Every number in it comes from my own notebook outputs.
 
 ## Built with
 
