@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editor / tool folders
+.vscode/
+.idea/
+.claude/
+
+# Secrets (Kaggle API token, env files)
+.env
+kaggle.json
