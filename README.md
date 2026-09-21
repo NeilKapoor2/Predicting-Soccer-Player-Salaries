@@ -1,6 +1,8 @@
 # Predicting Soccer Player Salaries
 
-**I trained a model to predict MLS salaries and got an R² of 0.99. Then I figured out it was cheating.**
+** I trained models to predict soccer salaries and got 99% accuracy, then found the model was cheating with a column that was nearly the answer. Removing it showed that salary tracks contracts and negotiation more than skill, so I'm now trying to measure players without using pay.
+
+**The question:** Does salary measure skill?
 
 ## Why I built this
 
