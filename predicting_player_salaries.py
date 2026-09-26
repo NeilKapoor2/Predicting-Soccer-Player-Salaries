@@ -74,14 +74,22 @@ y = df["base_salary"]
 print(X.head())
 print(y.head())
 
-from sklearn.model_selection import train_test_split    #splits dataset into training and testing cases
+from sklearn.model_selection import GroupShuffleSplit    #splits dataset into training and testing cases, keeping groups together
 
-# Split the data into 80% training and 20% testing
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2      # 20% of the data for testing
-)
+# Split the data into 80% training and 20% testing.
+# Players appear in several seasons, so we split by player instead of by row:
+# every season of a given player lands entirely in train or entirely in test.
+# random_state=42 makes the split identical on every run.
+player_id = X["first_name"] + " " + X["last_name"]
+
+splitter = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+train_idx, test_idx = next(splitter.split(X, y, groups=player_id))
+
+X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+
+# Sanity check: no player appears in both sets
+assert set(player_id.iloc[train_idx]).isdisjoint(set(player_id.iloc[test_idx]))
 
 print("First training example (X_train):")
 print(X_train.iloc[0])
@@ -422,18 +430,15 @@ print(f"Neural Network    : ${nn_prediction:,.2f}")
 print("-" * 45)
 print(f"Ensemble Average  : ${ensemble_prediction:,.2f}")
 
-# Remove guaranteed_compensation from the inputs
+# Remove guaranteed_compensation from the inputs.
+# Reuse the SAME train/test players as the original models, so the only
+# difference between the two experiments is the missing column.
 X_no_gc = X.drop(columns=["guaranteed_compensation"])
 
-# Create new train/test split
-from sklearn.model_selection import train_test_split
-
-X_train_no_gc, X_test_no_gc, y_train_no_gc, y_test_no_gc = train_test_split(
-    X_no_gc,
-    y,
-    test_size=0.2,
-    random_state=42
-)
+X_train_no_gc = X_train.drop(columns=["guaranteed_compensation"])
+X_test_no_gc = X_test.drop(columns=["guaranteed_compensation"])
+y_train_no_gc = y_train
+y_test_no_gc = y_test
 
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
@@ -564,9 +569,6 @@ ensemble_predictions = (
     test_pred_nn
 ) / 5
 
-ensemble_percent_error = np.abs((y_test - ensemble_predictions) / y_test) * 100
-avg_original_percent_error = np.mean(ensemble_percent_error)
-
 # ----- Ensemble without guaranteed compensation -----
 ensemble_predictions_no_gc = (
     test_pred_lr_no_gc +
@@ -576,15 +578,62 @@ ensemble_predictions_no_gc = (
     test_pred_nn_no_gc
 ) / 5
 
-ensemble_percent_error_no_gc = np.abs(
-    (y_test_no_gc - ensemble_predictions_no_gc) / y_test_no_gc
-) * 100
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-avg_no_gc_percent_error = np.mean(ensemble_percent_error_no_gc)
+# Errors in dollars. Percent error blows up on players with tiny salaries,
+# so the headline comparison uses MAE and RMSE instead.
+def report(y_true, y_pred):
+    return {
+        "MAE": mean_absolute_error(y_true, y_pred),
+        "RMSE": np.sqrt(mean_squared_error(y_true, y_pred)),
+        "R2": r2_score(y_true, y_pred),
+    }
 
-# ----- Print comparison -----
-print("Ensemble Average Percent Error")
-print("---------------------------------------")
-print(f"Original Model:                 {avg_original_percent_error:.2f}%")
-print(f"Without Guaranteed Compensation: {avg_no_gc_percent_error:.2f}%")
-print(f"Difference:                     {avg_no_gc_percent_error - avg_original_percent_error:.2f}%")
+with_gc = report(y_test, ensemble_predictions)
+without_gc = report(y_test_no_gc, ensemble_predictions_no_gc)
+
+print("Ensemble error on the same held-out players")
+print("-" * 62)
+def dollars(x):
+    return f"${x:,.0f}"
+
+print(f"{'':34}{'MAE':>12}{'RMSE':>12}{'R2':>8}")
+print(f"{'With guaranteed compensation':34}{dollars(with_gc['MAE']):>12}{dollars(with_gc['RMSE']):>12}{with_gc['R2']:>8.2f}")
+print(f"{'Without guaranteed compensation':34}{dollars(without_gc['MAE']):>12}{dollars(without_gc['RMSE']):>12}{without_gc['R2']:>8.2f}")
+print("-" * 62)
+print(f"MAE is {without_gc['MAE'] / with_gc['MAE']:.1f}x larger without guaranteed compensation")
+
+# Chart for the README: the same ensemble, with and without the leaked column
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
+surface, ink, muted, grid = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
+labels = ["With guaranteed\ncompensation", "Without guaranteed\ncompensation"]
+values = [with_gc["MAE"], without_gc["MAE"]]
+ratio = values[1] / values[0]
+
+fig, ax = plt.subplots(figsize=(6.5, 4.4), facecolor=surface)
+ax.set_facecolor(surface)
+bars = ax.bar(labels, values, width=0.45, color=["#2a78d6", "#eb6834"])
+
+for bar, value in zip(bars, values):
+    ax.text(bar.get_x() + bar.get_width() / 2, value, f"${value:,.0f}",
+            ha="center", va="bottom", color=ink, fontsize=12, fontweight="bold")
+
+direction = "larger" if ratio >= 1 else "smaller"
+ax.set_title(f"Dropping one column made the error {max(ratio, 1 / ratio):.1f}x {direction}",
+             loc="left", color=ink, fontsize=13, fontweight="bold", pad=22)
+ax.text(0, 1.03, "Average salary error per player (MAE), same held-out players, ensemble of 5 models",
+        transform=ax.transAxes, color=muted, fontsize=8.5)
+
+ax.set_ylim(0, max(values) * 1.15)
+ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v:,.0f}"))
+ax.yaxis.grid(True, color=grid, linewidth=0.8)
+ax.set_axisbelow(True)
+ax.tick_params(colors=muted, length=0)
+for spine in ax.spines.values():
+    spine.set_visible(False)
+ax.spines["bottom"].set_visible(True)
+ax.spines["bottom"].set_color(grid)
+
+fig.savefig("leakage_comparison.png", dpi=200, bbox_inches="tight", facecolor=surface)
