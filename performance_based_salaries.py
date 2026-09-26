@@ -106,21 +106,36 @@ y = df["Annual USD"]
 print(X.head())
 print(y.head())
 
-from sklearn.model_selection import train_test_split    # splits dataset into training, validation, and testing cases
+from sklearn.model_selection import GroupShuffleSplit    # splits dataset into training, validation, and testing cases, keeping groups together
+
+# Some players appear more than once in the data (different seasons, clubs or
+# leagues), so we split by player: all rows for one player go to the same set.
+# random_state=42 makes every run use exactly the same split.
+player_id = df["Player"]
 
 # First split: 80% training/validation and 20% testing
-X_train_val, X_test, y_train_val, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2      # 20% of the data for testing
+outer_split = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+train_val_idx, test_idx = next(outer_split.split(X, y, groups=player_id))
+
+X_train_val, X_test = X.iloc[train_val_idx], X.iloc[test_idx]
+y_train_val, y_test = y.iloc[train_val_idx], y.iloc[test_idx]
+
+# Second split: 80% training and 20% validation (20% of the remaining 80% = 16% of total data)
+inner_split = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+train_idx, val_idx = next(
+    inner_split.split(X_train_val, y_train_val, groups=player_id.iloc[train_val_idx])
 )
 
-# Second split: 80% training and 20% validation
-X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val,
-    y_train_val,
-    test_size=0.2      # 20% of the remaining 80% = 16% of total data
-)
+X_train, X_val = X_train_val.iloc[train_idx], X_train_val.iloc[val_idx]
+y_train, y_val = y_train_val.iloc[train_idx], y_train_val.iloc[val_idx]
+
+# Sanity check: no player appears in more than one set
+train_players = set(player_id.loc[X_train.index])
+val_players = set(player_id.loc[X_val.index])
+test_players = set(player_id.loc[X_test.index])
+assert train_players.isdisjoint(val_players)
+assert train_players.isdisjoint(test_players)
+assert val_players.isdisjoint(test_players)
 
 print("Training data:")
 print("X_train:", X_train.shape)
@@ -671,23 +686,6 @@ print(
     f"{avg_weighted_ensemble_percent_error:.2f}%"
 )
 
-# Calculate percent error for each prediction
-weighted_ensemble_percent_error = np.abs(
-    (y_test - weighted_ensemble_predictions) / y_test
-) * 100
-
-print(weighted_ensemble_percent_error.head(10))
-
-# Calculate average percent error
-avg_weighted_ensemble_percent_error = np.mean(
-    weighted_ensemble_percent_error
-)
-
-print(
-    f"Weighted Ensemble Average Percent Error: "
-    f"{avg_weighted_ensemble_percent_error:.2f}%"
-)
-
 # Use the validation predictions from each existing model as inputs
 meta_X_train = np.column_stack([
     val_predictions_lr,
@@ -833,6 +831,25 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error
 
 # Possible hyperparameter values
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.model_selection import cross_val_score
+
+def make_meta_nn(**mlp_params):
+    # Salaries are in the millions, so the target has to be scaled as well as
+    # the inputs. Without this the network stays stuck near zero
+    # (this was the bug that made the old meta network predict about $100).
+    return TransformedTargetRegressor(
+        regressor=MLPRegressor(
+            max_iter=3000,
+            early_stopping=True,
+            validation_fraction=0.1,
+            n_iter_no_change=20,
+            random_state=42,
+            **mlp_params
+        ),
+        transformer=StandardScaler()
+    )
+
 hidden_layer_sizes_values = [
     (10,),
     (20,),
@@ -851,28 +868,21 @@ for hidden_layer_sizes in hidden_layer_sizes_values:
     for learning_rate in learning_rate_values:
         for alpha in alpha_values:
 
-            meta_nn_model = MLPRegressor(
+            meta_nn_model = make_meta_nn(
                 hidden_layer_sizes=hidden_layer_sizes,
                 learning_rate_init=learning_rate,
-                alpha=alpha,
-                max_iter=3000,
-                early_stopping=True,
-                validation_fraction=0.1,
-                n_iter_no_change=20,
-                random_state=42
+                alpha=alpha
             )
 
-            # Train using the validation predictions
-            meta_nn_model.fit(meta_X_train_scaled, meta_y_train)
-
-            # Make predictions
-            meta_val_predictions = meta_nn_model.predict(meta_X_train_scaled)
-
-            # Calculate MSE
-            meta_val_mse = mean_squared_error(
+            # Score with 5-fold cross-validation, so the choice is not made
+            # on data the network was trained on
+            meta_val_mse = -cross_val_score(
+                meta_nn_model,
+                meta_X_train_scaled,
                 meta_y_train,
-                meta_val_predictions
-            )
+                scoring="neg_mean_squared_error",
+                cv=5
+            ).mean()
 
             print(
                 "Hidden layers:", hidden_layer_sizes,
@@ -893,18 +903,11 @@ for hidden_layer_sizes in hidden_layer_sizes_values:
 print("\nBest Meta Neural Network parameters:")
 print(best_params)
 
-print("\nBest Meta Neural Network MSE:")
+print("\nBest Meta Neural Network MSE (cross-validated):")
 print(best_mse)
 
 # Create the Neural Network using the best hyperparameters
-meta_nn_model = MLPRegressor(
-    **best_params,
-    max_iter=3000,
-    early_stopping=True,
-    validation_fraction=0.1,
-    n_iter_no_change=20,
-    random_state=42
-)
+meta_nn_model = make_meta_nn(**best_params)
 
 # Train the best meta-model
 meta_nn_model.fit(meta_X_train_scaled, meta_y_train)
@@ -1003,61 +1006,25 @@ best_mse = model_mse[best_model]
 print("Best Model:", best_model)
 print("Best Test MSE:", best_mse)
 
-# Calculate average percent error for each model
+# Compare the models by MAE: the average number of dollars each prediction
+# is off by. Average percent error is misleading here because it explodes for
+# cheap players and rewards a model that simply predicts near zero.
+from sklearn.metrics import mean_absolute_error
 
-percent_error_lr = np.mean(
-    np.abs((y_test - test_predictions_lr) / y_test) * 100
-)
-
-percent_error_tree = np.mean(
-    np.abs((y_test - test_predictions_tree) / y_test) * 100
-)
-
-percent_error_rf = np.mean(
-    np.abs((y_test - test_predictions_rf) / y_test) * 100
-)
-
-percent_error_knn = np.mean(
-    np.abs((y_test - test_predictions_knn) / y_test) * 100
-)
-
-percent_error_nn = np.mean(
-    np.abs((y_test - test_predictions_nn) / y_test) * 100
-)
-
-percent_error_ensemble = np.mean(
-    np.abs((y_test - weighted_ensemble_predictions) / y_test) * 100
-)
-
-percent_error_meta = np.mean(
-    np.abs((y_test - meta_predictions) / y_test) * 100
-)
-
-print("Linear Regression:", percent_error_lr)
-print("Decision Tree:", percent_error_tree)
-print("Random Forest:", percent_error_rf)
-print("KNN:", percent_error_knn)
-print("Neural Network:", percent_error_nn)
-print("Weighted Ensemble:", percent_error_ensemble)
-print("Meta Neural Network:", percent_error_meta)
-
-model_percent_error = {
-    "Linear Regression": percent_error_lr,
-    "Decision Tree": percent_error_tree,
-    "Random Forest": percent_error_rf,
-    "KNN": percent_error_knn,
-    "Neural Network": percent_error_nn,
-    "Weighted Ensemble": percent_error_ensemble,
-    "Meta Neural Network": percent_error_meta
+model_mae = {
+    "Linear Regression": mean_absolute_error(y_test, test_predictions_lr),
+    "Decision Tree": mean_absolute_error(y_test, test_predictions_tree),
+    "Random Forest": mean_absolute_error(y_test, test_predictions_rf),
+    "KNN": mean_absolute_error(y_test, test_predictions_knn),
+    "Neural Network": mean_absolute_error(y_test, test_predictions_nn),
+    "Weighted Ensemble": mean_absolute_error(y_test, weighted_ensemble_predictions),
+    "Meta Neural Network": mean_absolute_error(y_test, meta_predictions)
 }
 
-best_percent_model = min(
-    model_percent_error,
-    key=model_percent_error.get
-)
+for name, value in model_mae.items():
+    print(f"{name}: ${value:,.0f}")
 
-print("Best Model by Average Percent Error:", best_percent_model)
-print(
-    "Average Percent Error:",
-    model_percent_error[best_percent_model]
-)
+best_mae_model = min(model_mae, key=model_mae.get)
+
+print("Best Model by MAE:", best_mae_model)
+print(f"MAE: ${model_mae[best_mae_model]:,.0f}")
