@@ -60,7 +60,7 @@ The biggest misses are fun, though. My best single model (Random Forest) thought
 [`performance_score.py`](performance_score.py) turns the question around. It scores 1,472 players from production alone (goals, assists, xG, xAG and progressive actions, all per 90 minutes, as a percentile against players in the same league and position). Salary is only used afterward, to see who is paid far above or below what their production suggests. The full list is in [`performance_score_results.csv`](performance_score_results.csv).
 
 - Rank correlation between the score and salary is only **0.29**, so pay follows production loosely.
-- The biggest "underpaid" forwards and midfielders include Zavier Gozo (Real Salt Lake), Romano Schmid (Werder Bremen) and Jeremy Doku (Manchester City). Doku is underpaid relative to Premier League midfielders, but his salary is normal for a player with his stats across all leagues.The biggest "overpaid" include Geoffrey Kondogbia and Casemiro.
+- The biggest "underpaid" forwards and midfielders include Zavier Gozo (Real Salt Lake), Romano Schmid (Werder Bremen) and Jeremy Doku (Manchester City). Doku is underpaid relative to Premier League midfielders, but his salary is normal for a player with his stats across all leagues. The biggest "overpaid" include Geoffrey Kondogbia and Casemiro.
 - I don't trust that second list much. Kondogbia and Casemiro are defensive midfielders, and my score can't see defending. The score also rates Erling Haaland at only 41 out of 100 because it rewards ball progression, while it rates Lionel Messi at 96. So the score is a starting point for questions, not a verdict on any player.
 
 ## What's in here
