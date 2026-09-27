@@ -16,6 +16,8 @@ import streamlit as st
 from flags import FLAGS, GAP_THRESHOLD, MIXED, NO_FLAG, OVERPAID, UNDERPAID, add_flags
 from performance_score import add_salary_gap, score_players, select_players, stat_percentiles
 from salary_model import train_salary_model
+from scout import (CONFIDENCE_RULES, FAIR, HIGH, LOW, MEDIUM, OVERPAID as SCOUT_OVERPAID, UNCLEAR,
+                   UNDERPAID as SCOUT_UNDERPAID, percentile_among, score_new_player, verdict)
 
 DATA_FILE = Path(__file__).parent / "dfAll.csv"
 REPO_URL = "https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries"
@@ -56,6 +58,10 @@ FLAG_WHY = {
 
 def money(x):
     return f"${x:,.0f}"
+
+
+def millions(x):
+    return f"${x / 1e6:.1f}M"
 
 
 def money_md(x):
@@ -100,7 +106,8 @@ STYLE = """
       letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
   [data-testid="stMetricValue"] { font-family:"Barlow Condensed",sans-serif; font-weight:700;
       font-size:clamp(34px,4.5vw,50px); line-height:1.05; font-variant-numeric:tabular-nums; }
-  .st-key-model-guess [data-testid="stMetricValue"] { color:var(--gold); }
+  .st-key-model-guess [data-testid="stMetricValue"],
+  .st-key-scout-guess [data-testid="stMetricValue"] { color:var(--gold); }
 
   /* Player panel */
   .st-key-player-panel { background:linear-gradient(180deg,var(--panel),#0f211c);
@@ -124,6 +131,17 @@ STYLE = """
   .gauge .ends { display:flex; justify-content:space-between; margin-top:7px;
       font-family:"Space Mono",monospace; font-size:10px; letter-spacing:.14em;
       text-transform:uppercase; color:var(--muted); }
+  /* Tabs as the sample's pill buttons */
+  .stTabs [data-baseweb="tab-list"] { gap:6px; }
+  .stTabs [role="tab"] { padding:9px 18px !important; border-radius:999px !important;
+      height:auto !important; color:var(--muted); }
+  .stTabs [role="tab"] p { font-family:"Barlow Condensed",sans-serif !important; font-weight:600;
+      letter-spacing:.08em; text-transform:uppercase; font-size:15px !important; }
+  .stTabs [role="tab"][aria-selected="true"] { background:var(--gold) !important; }
+  .stTabs [role="tab"][aria-selected="true"] p { color:var(--ink) !important; }
+  .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display:none; }
+  .pill { display:inline-block; font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.14em;
+          text-transform:uppercase; padding:3px 10px; border-radius:999px; border:1px solid; margin-top:8px; }
   .footnote { color:var(--muted); font-size:12px; font-family:"Space Mono",monospace;
       letter-spacing:.04em; text-align:center; margin-top:18px; }
 </style>
@@ -212,124 +230,251 @@ with player_slot:
                           index=None, placeholder="Type a name...")
 
 
-# ----- Player lookup -----
-st.header("Look up a player")
+# ----- Tabs: look up a real player, or scout a made-up one -----
+tab_lookup, tab_scout = st.tabs(["Look up a player", "Scout a new player"])
 
-if shown.empty:
-    st.info("No players match these filters.")
-else:
-    if row_id is None:
-        st.info("Pick a player at the top of the left pane (tap » on a phone) to see how "
-                "their pay compares with their production.")
+# ----- Tab 1: player lookup -----
+with tab_lookup:
 
-    if row_id is not None:
-        with st.container(key="player-panel"):
-            player = scores.loc[row_id]
-            group = player["position_group"]
-            peers = f"{POSITION_NAMES.get(group, group + ' players')} in {player['League']}"
-            peer_count = ((scores["League"] == player["League"]) & (scores["position_group"] == group)).sum()
+    if shown.empty:
+        st.info("No players match these filters.")
+    else:
+        if row_id is None:
+            st.info("Pick a player at the top of the left pane (tap » on a phone) to see how "
+                    "their pay compares with their production.")
 
-            # --- Headline numbers ---
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Performance score", f"{player['performance_score']:.0f} / 100",
-                        help="Average percentile across 7 per-90 stats, against " + peers)
-            col2.metric("Salary percentile", f"{player['salary_percentile']:.0f} / 100",
-                        help=f"Paid more than about this share of {peers} ({money_md(player['Annual USD'])} a year)")
-            col3.metric("Gap", f"{player['gap']:+.0f}",
-                        help="Performance score minus salary percentile")
+        if row_id is not None:
+            with st.container(key="player-panel"):
+                player = scores.loc[row_id]
+                group = player["position_group"]
+                peers = f"{POSITION_NAMES.get(group, group + ' players')} in {player['League']}"
+                peer_count = ((scores["League"] == player["League"]) & (scores["position_group"] == group)).sum()
 
-            st.write(
-                f"Among {peer_count} {peers}, this player's production ranks around the "
-                f"**{player['performance_score']:.0f}th percentile**, and their salary ranks around the "
-                f"**{player['salary_percentile']:.0f}th**."
-            )
+                # --- Headline numbers ---
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Performance score", f"{player['performance_score']:.0f} / 100",
+                            help="Average percentile across 7 per-90 stats, against " + peers)
+                col2.metric("Salary percentile", f"{player['salary_percentile']:.0f} / 100",
+                            help=f"Paid more than about this share of {peers} ({money_md(player['Annual USD'])} a year)")
+                col3.metric("Gap", f"{player['gap']:+.0f}",
+                            help="Performance score minus salary percentile")
 
-            # --- Scouting flag: only when both methods agree ---
-            low = max(0, player["model_guess"] - salary_model.test_mae)
-            high = player["model_guess"] + salary_model.test_mae
-            flag = player["flag"]
-            title = flag if flag in (MIXED, NO_FLAG) else f"Flag: {flag.lower()}"
-            st.markdown(stamp(title, FLAG_WHY[flag], FLAG_COLORS[flag]), unsafe_allow_html=True)
+                st.write(
+                    f"Among {peer_count} {peers}, this player's production ranks around the "
+                    f"**{player['performance_score']:.0f}th percentile**, and their salary ranks around the "
+                    f"**{player['salary_percentile']:.0f}th**."
+                )
 
-            score_reading = {1: "points to *underpaid*", -1: "points to *overpaid*",
-                             0: f"within ±{GAP_THRESHOLD}, no signal"}[player["score_signal"]]
-            model_reading = {1: "below the model's range, points to *underpaid*",
-                             -1: "above the model's range, points to *overpaid*",
-                             0: "inside the model's range, no signal"}[player["model_signal"]]
+                # --- Scouting flag: only when both methods agree ---
+                low = max(0, player["model_guess"] - salary_model.test_mae)
+                high = player["model_guess"] + salary_model.test_mae
+                flag = player["flag"]
+                title = flag if flag in (MIXED, NO_FLAG) else f"Flag: {flag.lower()}"
+                st.markdown(stamp(title, FLAG_WHY[flag], FLAG_COLORS[flag]), unsafe_allow_html=True)
+
+                score_reading = {1: "points to *underpaid*", -1: "points to *overpaid*",
+                                 0: f"within ±{GAP_THRESHOLD}, no signal"}[player["score_signal"]]
+                model_reading = {1: "below the model's range, points to *underpaid*",
+                                 -1: "above the model's range, points to *overpaid*",
+                                 0: "inside the model's range, no signal"}[player["model_signal"]]
+                st.markdown(
+                    f"- **Performance score:** gap of {player['gap']:+.0f} → {score_reading}\n"
+                    f"- **Salary model:** actual {money_md(player['Annual USD'])} vs. range "
+                    f"{money_md(low)}–{money_md(high)} → {model_reading}"
+                )
+                st.caption("Both methods are built from the same stats, so agreement is stronger "
+                           "evidence, not proof.")
+
+                st.markdown(gauge(player["gap"]), unsafe_allow_html=True)
+
+                if group in DEFENSIVE_POSITIONS or "DM" in str(player["Pos_x"]):
+                    st.warning("The score can't see defending (tackles, interceptions, positioning), "
+                               "so it underrates defensive players.")
+                if peer_count < 10:
+                    sharing = "player has" if peer_count == 1 else "players share"
+                    st.warning(f"Only {peer_count} {sharing} this position code in this league, "
+                               "so these percentiles compare against very few players.")
+
+                # --- What the score is made of ---
+                st.subheader("Where the score comes from")
+                breakdown = pd.DataFrame({
+                    "Stat": [STAT_NAMES[s] for s in percentiles.columns],
+                    "Percentile": percentiles.loc[row_id].round(0).values,
+                    "Per 90 minutes": [round(player[s + "_per90"], 2) for s in percentiles.columns],
+                })
+                # Fixed 0-100 axis and no zoom, so scrolling the page doesn't rescale the chart
+                chart = alt.Chart(breakdown).mark_bar(color="#E8B84B", cornerRadiusEnd=3).encode(
+                    x=alt.X("Percentile", scale=alt.Scale(domain=[0, 100])),
+                    y=alt.Y("Stat", sort=None, title=None),
+                    tooltip=["Stat", "Percentile", "Per 90 minutes"],
+                ).properties(height=240, background="transparent").configure_axis(
+                    labelColor="#7F9A8D", titleColor="#7F9A8D", gridColor="#254339", domainColor="#254339",
+                    labelFont="Inter", titleFont="Space Mono", labelLimit=220,
+                ).configure_view(stroke=None)
+                st.altair_chart(chart, width="stretch")
+                st.caption(f"Each bar: how this player's per-90 number ranks against {peers} (0–100).")
+
+                # --- The salary model (Project 2) ---
+                st.subheader("What a salary model trained on stats would guess")
+                predicted = player["model_guess"]
+
+                col1, col2 = st.columns(2)
+                col1.metric("Actual salary", money(player["Annual USD"]))
+                with col2.container(key="model-guess"):
+                    st.metric("Model's guess", money(predicted) if predicted > 0 else "below $0")
+                st.write(
+                    f"The model is typically off by **±{money_md(salary_model.test_mae)}** on players it has "
+                    f"never seen, so its honest answer is somewhere between **{money_md(low)}** and "
+                    f"**{money_md(high)}**. That range is the point: stats alone can't pin down pay "
+                    f"(R² {salary_model.test_r2:.2f})."
+                )
+                if predicted <= 0:
+                    st.caption("A linear model can go below zero for players with few minutes. "
+                               "That's a limit of the model, not a real salary.")
+                st.caption("This player may have been in the model's training data, "
+                           "so the guess can look closer than it would for a brand-new player.")
+
+                # --- What-if sliders ---
+                with st.expander("What if this player's numbers were different?"):
+                    what_if = player.to_dict()
+                    for stat, label, top in [("Min", "Minutes played", 3420), ("Gls", "Goals", 40),
+                                             ("Ast", "Assists", 25), ("xG", "Expected goals (xG)", 30.0),
+                                             ("xAG", "Expected assists (xAG)", 20.0)]:
+                        start = float(player[stat]) if isinstance(top, float) else int(player[stat])
+                        what_if[stat] = st.slider(label, 0 * top, max(top, start), start, key=f"{stat}-{row_id}")
+                    what_if.pop("G+A")   # recalculated from goals + assists
+                    what_if.pop("90s")   # recalculated from minutes
+
+                    new_guess = salary_model.predict(what_if)
+                    st.metric("Model's new guess", money(new_guess) if new_guess > 0 else "below $0",
+                              delta=f"{new_guess - predicted:+,.0f} dollars")
+                    st.caption("Try adding assists: the guess can go *down*. Several stats overlap "
+                               "(goals, xG, goals + assists), so the model splits credit between them "
+                               "in strange ways. It learned patterns in pay, not what makes a player good.")
+
+
+
+# ----- Tab 2: scout a player the models have never seen -----
+VERDICT_COLORS = {SCOUT_UNDERPAID: "var(--more)", SCOUT_OVERPAID: "var(--less)",
+                  FAIR: "var(--even)", UNCLEAR: "var(--gold)"}
+CONFIDENCE_COLORS = {HIGH: "var(--gold)", MEDIUM: "var(--chalk)", LOW: "var(--muted)"}
+# (stat, label, min, max, step)
+SCOUT_SLIDERS = [
+    ("MP", "Matches played", 10, 38, 1), ("Starts", "Starts", 0, 38, 1),
+    ("Min", "Minutes", 900, 3420, 10), ("Gls", "Goals", 0, 31, 1), ("Ast", "Assists", 0, 18, 1),
+    ("xG", "Expected goals (xG)", 0.0, 28.0, 0.1), ("xAG", "Expected assists (xAG)", 0.0, 15.0, 0.1),
+    ("PrgC", "Progressive carries", 0, 220, 1), ("PrgP", "Progressive passes", 0, 400, 1),
+    ("PrgR", "Progressive passes received", 0, 500, 1),
+]
+
+
+def share_text(share):
+    return "fewer than 1%" if share < 0.01 else f"{share:.0%}"
+
+
+def share_as_extreme(values, x):
+    """Share of real players whose value is at least as far out as x, in x's direction."""
+    return (values >= x).mean() if x > 0 else (values <= x).mean()
+
+
+with tab_scout:
+    st.markdown('<p class="block-label">A made-up player the models have never seen</p>',
+                unsafe_allow_html=True)
+    profile, readout = st.columns(2, gap="large")
+
+    with profile:
+        c1, c2 = st.columns(2)
+        league_options = sorted(scores["League"].unique())
+        scout_league = c1.selectbox("League", league_options, key="scout-league",
+                                    index=league_options.index("Premier League"))
+        scout_group = c2.selectbox("Position", ["FW", "MF", "DF"], key="scout-position",
+                                   format_func=lambda g: POSITION_NAMES[g].capitalize())
+        scout_peers = scores[(scores["League"] == scout_league) & (scores["position_group"] == scout_group)]
+        typical = scout_peers.median(numeric_only=True)
+        st.caption(f"Sliders start at the typical (median) {POSITION_NAMES[scout_group][:-1]} "
+                   f"in {scout_league}. At least 900 minutes, like the real players.")
+
+        # Keys include league + position, so sliders reset when either changes
+        k = f"{scout_league}-{scout_group}"
+        new_player = {}
+        for stat, label, lo, hi, step in SCOUT_SLIDERS:
+            start = min(max(typical[stat], lo), hi)
+            start = round(float(start), 1) if isinstance(step, float) else int(round(start))
+            new_player[stat] = st.slider(label, lo, hi, start, step, key=f"scout-{stat}-{k}")
+        scout_salary = st.number_input("Salary (USD per year)", min_value=0, max_value=50_000_000,
+                                       value=int(typical["Annual USD"]), step=50_000,
+                                       key=f"scout-salary-{k}")
+
+        # Keep the numbers physically possible
+        if new_player["Starts"] > new_player["MP"] or new_player["Min"] > new_player["MP"] * 90:
+            new_player["Starts"] = min(new_player["Starts"], new_player["MP"])
+            new_player["Min"] = min(new_player["Min"], new_player["MP"] * 90)
+            st.caption(f"Adjusted to fit {new_player['MP']} matches: {new_player['Starts']} starts, "
+                       f"{new_player['Min']:,} minutes.")
+
+    with readout:
+        guess = salary_model.predict(new_player)
+        stat_pcts, new_score = score_new_player(new_player, scout_peers)
+        new_salary_pct = percentile_among(scout_peers["Annual USD"], scout_salary)
+        new_gap = new_score - new_salary_pct
+        label, confidence = verdict(new_gap, scout_salary, guess, salary_model.test_mae)
+
+        col1, col2 = st.columns(2)
+        with col1.container(key="scout-guess"):
+            st.metric("Model's guess", millions(guess) if guess > 0 else "below $0",
+                      help=money_md(guess) if guess > 0 else None)
+        col2.metric("Salary entered", millions(scout_salary), help=money_md(scout_salary))
+
+        st.markdown(
+            f'<div class="stamp" style="border-color:{VERDICT_COLORS[label]}">'
+            f'<div><div class="verdict" style="color:{VERDICT_COLORS[label]}">{label}</div>'
+            f'<span class="pill" style="color:{CONFIDENCE_COLORS[confidence]};'
+            f'border-color:{CONFIDENCE_COLORS[confidence]}">{confidence} confidence</span></div>'
+            f'<div class="why">Performance score {new_score:.0f} vs. salary percentile '
+            f'{new_salary_pct:.0f} among {POSITION_NAMES[scout_group]} in {scout_league}.</div></div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(gauge(new_gap), unsafe_allow_html=True)
+
+        # What each method says, and how unusual that is among real players
+        low_end = max(0, guess - salary_model.test_mae)
+        high_end = guess + salary_model.test_mae
+        gap_share = share_as_extreme(scores["gap"], new_gap)
+        miss = guess - scout_salary
+        miss_share = share_as_extreme(scores["model_guess"] - scores["Annual USD"], miss)
+        pay_side = "below" if miss > 0 else "above"
+        if abs(new_gap) >= GAP_THRESHOLD:
+            score_line = (f"gap of {new_gap:+.0f}, points to *{'underpaid' if new_gap > 0 else 'overpaid'}*. "
+                          f"Only {share_text(gap_share)} of real players have a gap this "
+                          f"{'high' if new_gap > 0 else 'low'}.")
+        else:
+            score_line = f"gap of {new_gap:+.0f}, within ±{GAP_THRESHOLD}, so no signal."
+        if abs(miss) > salary_model.test_mae:
+            model_line = (f"the salary is {pay_side} its range, points to "
+                          f"*{'underpaid' if miss > 0 else 'overpaid'}*. Only {share_text(miss_share)} of real "
+                          f"players are paid this far {pay_side} its guess.")
+        else:
+            model_line = "the salary is inside its range, so no signal."
+        st.markdown(
+            f"- **Performance score:** {score_line}\n"
+            f"- **Salary model:** guesses {money_md(guess)}, typically off by "
+            f"±{money_md(salary_model.test_mae)} (range {money_md(low_end)}–{money_md(high_end)}); "
+            f"{model_line}"
+        )
+        if guess <= 0:
+            st.caption("The salary model goes below zero here. That's a limit of a linear model, "
+                       "not a real salary.")
+        if scout_group == "DF":
+            st.warning("The performance score can't see defending, so it underrates defenders.")
+
+        with st.expander("How the verdict and confidence are decided"):
+            st.markdown(CONFIDENCE_RULES)
             st.markdown(
-                f"- **Performance score:** gap of {player['gap']:+.0f} → {score_reading}\n"
-                f"- **Salary model:** actual {money_md(player['Annual USD'])} vs. range "
-                f"{money_md(low)}–{money_md(high)} → {model_reading}"
+                "Even **High** confidence isn't certainty. The salary model explains only "
+                f"about {salary_model.test_r2:.0%} of the differences in pay (R² {salary_model.test_r2:.2f}), "
+                "both methods use the same stats, and neither sees defending, age, contract length "
+                "or transfer fees. Treat the verdict as where to look, not what to do."
             )
-            st.caption("Both methods are built from the same stats, so agreement is stronger "
-                       "evidence, not proof.")
-
-            st.markdown(gauge(player["gap"]), unsafe_allow_html=True)
-
-            if group in DEFENSIVE_POSITIONS or "DM" in str(player["Pos_x"]):
-                st.warning("The score can't see defending (tackles, interceptions, positioning), "
-                           "so it underrates defensive players.")
-            if peer_count < 10:
-                sharing = "player has" if peer_count == 1 else "players share"
-                st.warning(f"Only {peer_count} {sharing} this position code in this league, "
-                           "so these percentiles compare against very few players.")
-
-            # --- What the score is made of ---
-            st.subheader("Where the score comes from")
-            breakdown = pd.DataFrame({
-                "Stat": [STAT_NAMES[s] for s in percentiles.columns],
-                "Percentile": percentiles.loc[row_id].round(0).values,
-                "Per 90 minutes": [round(player[s + "_per90"], 2) for s in percentiles.columns],
-            })
-            # Fixed 0-100 axis and no zoom, so scrolling the page doesn't rescale the chart
-            chart = alt.Chart(breakdown).mark_bar(color="#E8B84B", cornerRadiusEnd=3).encode(
-                x=alt.X("Percentile", scale=alt.Scale(domain=[0, 100])),
-                y=alt.Y("Stat", sort=None, title=None),
-                tooltip=["Stat", "Percentile", "Per 90 minutes"],
-            ).properties(height=240, background="transparent").configure_axis(
-                labelColor="#7F9A8D", titleColor="#7F9A8D", gridColor="#254339", domainColor="#254339",
-                labelFont="Inter", titleFont="Space Mono", labelLimit=220,
-            ).configure_view(stroke=None)
-            st.altair_chart(chart, width="stretch")
-            st.caption(f"Each bar: how this player's per-90 number ranks against {peers} (0–100).")
-
-            # --- The salary model (Project 2) ---
-            st.subheader("What a salary model trained on stats would guess")
-            predicted = player["model_guess"]
-
-            col1, col2 = st.columns(2)
-            col1.metric("Actual salary", money(player["Annual USD"]))
-            with col2.container(key="model-guess"):
-                st.metric("Model's guess", money(predicted) if predicted > 0 else "below $0")
-            st.write(
-                f"The model is typically off by **±{money_md(salary_model.test_mae)}** on players it has "
-                f"never seen, so its honest answer is somewhere between **{money_md(low)}** and "
-                f"**{money_md(high)}**. That range is the point: stats alone can't pin down pay "
-                f"(R² {salary_model.test_r2:.2f})."
-            )
-            if predicted <= 0:
-                st.caption("A linear model can go below zero for players with few minutes. "
-                           "That's a limit of the model, not a real salary.")
-            st.caption("This player may have been in the model's training data, "
-                       "so the guess can look closer than it would for a brand-new player.")
-
-            # --- What-if sliders ---
-            with st.expander("What if this player's numbers were different?"):
-                what_if = player.to_dict()
-                for stat, label, top in [("Min", "Minutes played", 3420), ("Gls", "Goals", 40),
-                                         ("Ast", "Assists", 25), ("xG", "Expected goals (xG)", 30.0),
-                                         ("xAG", "Expected assists (xAG)", 20.0)]:
-                    start = float(player[stat]) if isinstance(top, float) else int(player[stat])
-                    what_if[stat] = st.slider(label, 0 * top, max(top, start), start, key=f"{stat}-{row_id}")
-                what_if.pop("G+A")   # recalculated from goals + assists
-                what_if.pop("90s")   # recalculated from minutes
-
-                new_guess = salary_model.predict(what_if)
-                st.metric("Model's new guess", money(new_guess) if new_guess > 0 else "below $0",
-                          delta=f"{new_guess - predicted:+,.0f} dollars")
-                st.caption("Try adding assists: the guess can go *down*. Several stats overlap "
-                           "(goals, xG, goals + assists), so the model splits credit between them "
-                           "in strange ways. It learned patterns in pay, not what makes a player good.")
 
 
 # ----- Chart: score vs salary -----

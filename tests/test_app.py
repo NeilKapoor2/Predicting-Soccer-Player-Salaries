@@ -40,7 +40,7 @@ def scored(big_leagues):
 
 def pick(row_id):
     app = run_app()
-    app.selectbox[0].set_value(row_id).run()
+    app.sidebar.selectbox[0].set_value(row_id).run()
     assert not app.exception
     return app
 
@@ -67,7 +67,7 @@ def test_model_guess_matches_salary_model(big_leagues, scored):
 
 def test_repeated_names_can_be_told_apart(scored):
     app = run_app()
-    labels = [app.selectbox[0].format_func(i) for i in scored.index[scored["Player"] == "Antony"]]
+    labels = [app.sidebar.selectbox[0].format_func(i) for i in scored.index[scored["Player"] == "Antony"]]
     assert len(set(labels)) == len(labels) == 2
 
 
@@ -117,3 +117,23 @@ def test_flag_filter_narrows_the_list():
     assert not app.exception
     assert len(app.sidebar.selectbox[0].options) == 105
     assert (app.dataframe[0].value["flag"] == "Possibly underpaid").all()
+
+
+# ----- Scout a new player -----
+
+def test_scout_tab_gives_a_verdict():
+    app = run_app()
+    assert not app.exception
+    assert any("confidence" in block.value for block in app.markdown)
+
+
+def test_scout_low_salary_star_forward_is_underpaid():
+    app = run_app()
+    app.selectbox(key="scout-position").set_value("FW").run()
+    k = "Premier League-FW"
+    for stat, value in [("Gls", 25), ("Ast", 12), ("xG", 22.0), ("xAG", 10.0), ("Min", 3000), ("MP", 36), ("Starts", 34)]:
+        app.slider(key=f"scout-{stat}-{k}").set_value(value)
+    app.number_input(key=f"scout-salary-{k}").set_value(300_000).run()
+    assert not app.exception
+    stamp = next(block.value for block in app.markdown if "confidence</span>" in block.value)
+    assert ">Underpaid<" in stamp
