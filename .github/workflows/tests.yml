@@ -16,4 +16,9 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-dev.txt
       - run: pip install -r requirements-dev.txt
+      # The Kaggle data is downloaded by the tests; keep it between runs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/kagglehub
+          key: kagglehub-${{ hashFiles('data.py') }}
       - run: pytest -v
