@@ -4,6 +4,8 @@
 
 **Try the app:** [does-salary-measure-skill.streamlit.app](https://does-salary-measure-skill.streamlit.app/). Look up any of 1,472 players, or scout a made-up one. (If it's been asleep, give it about 30 seconds to wake up.)
 
+[![The app's player view: Zavier Gozo scores in the 70th percentile for production but the 3rd for salary among MLS midfielders, and gets the flag 'possibly underpaid' because both methods agree](images/app-screenshot.png)](https://does-salary-measure-skill.streamlit.app/)
+
 **I trained a model to predict MLS salaries and got an R² of 0.99. Then I figured out it was cheating.**
 
 **The short version:** I trained models to predict soccer salaries and got 99% accuracy, then found the model was cheating with a column that was nearly the answer. Removing it showed that salary tracks contracts and negotiation more than skill, so I'm now trying to measure players without using pay.
@@ -79,6 +81,7 @@ The biggest misses are fun, though. My best single model (Random Forest) thought
 | `salary_model.py` | Project 2's linear regression as plain numbers (a starting value plus one weight per stat), for the app |
 | `data.py` | Shared code: loads both datasets and splits them by player, so every project prepares data the same way |
 | `evaluation.py` | Shared code: error measures in dollars (MAE, RMSE, MSE) and R², and the results tables |
+| `images/app-screenshot.png` | Screenshot of the app for this README |
 | `leakage_comparison.png` | The chart above (made by the Project 1 script and notebook) |
 | `tests/` | Automated checks that run on every push (see "Tests") |
 | `requirements.txt` | Python libraries, with the exact versions I ran |

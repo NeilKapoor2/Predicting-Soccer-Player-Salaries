@@ -58,6 +58,13 @@ def money(x):
     return f"${x:,.0f}"
 
 
+def ordinal(x):
+    """70 -> '70th', 3 -> '3rd', 21 -> '21st', 12 -> '12th'."""
+    n = int(round(x))
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
 def millions(x):
     return f"${x / 1e6:.1f}M"
 
@@ -262,8 +269,8 @@ with tab_lookup:
 
                 st.write(
                     f"Among {peer_count} {peers}, this player's production ranks around the "
-                    f"**{player['performance_score']:.0f}th percentile**, and their salary ranks around the "
-                    f"**{player['salary_percentile']:.0f}th**."
+                    f"**{ordinal(player['performance_score'])} percentile**, and their salary ranks around the "
+                    f"**{ordinal(player['salary_percentile'])}**."
                 )
 
                 # --- Scouting flag: only when both methods agree ---
