@@ -58,8 +58,8 @@ Mitja Ilenič,NYCFC,MLS,DF,12.1,77.6,27.16,50.44,300000.0
 Pontus Almqvist,Parma,Serie A,"DF,MF",12.4,73.35,23.08,50.27,1284275.0
 Þórir Jóhann Helgason,Lecce,Serie A,"MF,FW",12.8,51.36,1.19,50.17,69420.0
 Nnamdi Collins,Eint Frankfurt,Bundesliga,DF,16.5,60.83,10.67,50.16,1087585.0
-Omar Traoré,Heidenheim,Bundesliga,DF,29.1,52.25,2.25,50.0,659493.0
 Mitchell Weiser,Werder Bremen,Bundesliga,RB,31.9,100.0,50.0,50.0,3274324.0
+Omar Traoré,Heidenheim,Bundesliga,DF,29.1,52.25,2.25,50.0,659493.0
 Tyrick Mitchell,Crystal Palace,Premier League,"DF,MF",34.4,60.56,10.64,49.92,2725219.0
 Gaetano Oristanio,Parma,Serie A,"MF,FW",25.7,61.73,11.9,49.83,856184.0
 Abel Bretones,Osasuna,La Liga,DF,23.0,61.76,11.95,49.81,329866.0
@@ -531,8 +531,8 @@ Gabriel Pirani,D.C. United,MLS,"MF,FW",21.0,77.47,66.24,11.23,725000.0
 Destiny Udogie,Tottenham,Premier League,DF,21.4,61.17,50.0,11.17,5109785.0
 Marco Reus,LA Galaxy,MLS,"MF,FW",16.5,87.18,76.07,11.11,880000.0
 Joshua Yaro,St. Louis,MLS,DF,14.1,26.37,15.43,10.93,185000.0
-Martín Payero,Cremonese,Serie A,MF,15.3,46.0,35.12,10.88,1781787.0
 Hernani,Parma,Serie A,"MF,DF",14.7,72.79,61.9,10.88,3216473.0
+Martín Payero,Cremonese,Serie A,MF,15.3,46.0,35.12,10.88,1781787.0
 Igor,West Ham,Premier League,DF,10.7,27.36,16.49,10.87,3065871.0
 Álvaro García,Rayo Vallecano,La Liga,"FW,MF",28.4,56.53,45.71,10.82,1494704.0
 Pavel Bucha,FC Cincinnati,MLS,MF,32.0,51.83,41.03,10.81,474996.0
@@ -591,8 +591,8 @@ Andrew Privett,Charlotte,MLS,DF,20.0,24.51,16.67,7.85,220000.0
 Beto,Everton,Premier League,FW,17.0,33.33,25.49,7.84,4087828.0
 Patrick Wimmer,Wolfsburg,Bundesliga,FW,19.7,44.9,37.14,7.76,2186739.0
 Tommaso Pobega,Bologna,Serie A,MF,13.1,52.38,44.64,7.74,2140459.0
-Leandro Cabrera,Espanyol,La Liga,DF,31.9,47.03,39.38,7.65,865897.0
 Ander Barrenetxea,Real Sociedad,La Liga,"MF,FW",14.0,69.6,61.95,7.65,1608095.0
+Leandro Cabrera,Espanyol,La Liga,DF,31.9,47.03,39.38,7.65,865897.0
 Lee Kang-in,Paris S-G,Ligue 1,"MF,FW",18.5,88.57,81.0,7.57,5264372.0
 Ylber Ramadani,Lecce,Serie A,MF,20.1,17.01,9.52,7.48,671063.0
 Aron Dønnum,Toulouse,Ligue 1,"MF,DF",29.9,51.43,44.0,7.43,1897488.0
@@ -719,21 +719,21 @@ Djibril Diani,Charlotte,MLS,MF,12.8,25.82,25.64,0.18,300000.0
 Tyler Adams,Bournemouth,Premier League,MF,21.8,24.04,23.94,0.1,4087828.0
 Sander Berge,Fulham,Premier League,MF,24.7,19.11,19.01,0.1,3747176.0
 Mario Pašalić,Atalanta,Serie A,MF,21.9,76.87,76.79,0.09,4280918.0
-Mohammed Sofo,NY Red Bulls,MLS,LW,17.5,100.0,100.0,0.0,130000.0
-Oladapo Afolayan,St. Pauli,Bundesliga,RW,18.2,100.0,100.0,0.0,1307415.0
 Julián Fernández,NYCFC,MLS,RW,15.7,100.0,100.0,0.0,660000.0
-Gerard Martín,Barcelona,La Liga,LB,11.5,100.0,100.0,0.0,475809.0
 Tomas Totland,St. Louis,MLS,RB,11.9,100.0,100.0,0.0,300000.0
+Mohammed Sofo,NY Red Bulls,MLS,LW,17.5,100.0,100.0,0.0,130000.0
 Peyton Miller,NE Revolution,MLS,LB,23.0,100.0,100.0,0.0,104000.0
-Yanis Zouaoui,Le Havre,Ligue 1,LB,10.8,100.0,100.0,0.0,636353.0
 Yoane Wissa,Newcastle Utd,Premier League,CF,32.4,100.0,100.0,0.0,9538266.0
-Mikel Jauregizar,Athletic Club,La Liga,CM,24.9,100.0,100.0,0.0,216474.0
-Frederic Guilbert,Lecce,Serie A,RB,27.1,100.0,100.0,0.0,1504106.0
 Jadon Sancho,Manchester Utd,Premier League,LW,19.6,100.0,100.0,0.0,3406524.0
 Tyler Dibling,Everton,Premier League,RW,20.8,100.0,100.0,0.0,2725219.0
-Tomáš Suslov,Hellas Verona,Serie A,AM,23.1,100.0,100.0,0.0,590072.0
-Ernest Nuamah,Lyon,Ligue 1,RW,11.7,100.0,100.0,0.0,4419758.0
 Jamal Musiala,Bayern Munich,Bundesliga,AM,20.0,100.0,100.0,0.0,21832681.0
+Oladapo Afolayan,St. Pauli,Bundesliga,RW,18.2,100.0,100.0,0.0,1307415.0
+Ernest Nuamah,Lyon,Ligue 1,RW,11.7,100.0,100.0,0.0,4419758.0
+Yanis Zouaoui,Le Havre,Ligue 1,LB,10.8,100.0,100.0,0.0,636353.0
+Gerard Martín,Barcelona,La Liga,LB,11.5,100.0,100.0,0.0,475809.0
+Mikel Jauregizar,Athletic Club,La Liga,CM,24.9,100.0,100.0,0.0,216474.0
+Frederic Guilbert,Lecce,Serie A,RB,27.1,100.0,100.0,0.0,1504106.0
+Tomáš Suslov,Hellas Verona,Serie A,AM,23.1,100.0,100.0,0.0,590072.0
 Pol Lozano,Espanyol,La Liga,MF,21.6,22.57,22.57,-0.0,639115.0
 Finn Surman,Portland Timbers,MLS,DF,30.2,15.83,16.05,-0.22,200000.0
 Jackson Irvine,St. Pauli,Bundesliga,MF,29.0,43.42,43.65,-0.23,2406570.0
@@ -786,8 +786,8 @@ Achraf Hakimi,Paris S-G,Ligue 1,DF,23.0,97.48,100.0,-2.52,15781545.0
 Moïse Bombito,Nice,Ligue 1,DF,24.4,32.04,34.56,-2.52,1897488.0
 Kye Rowles,D.C. United,MLS,DF,29.8,23.24,25.93,-2.69,292500.0
 Lilian Brassier,Rennes,Ligue 1,DF,13.7,63.45,66.18,-2.73,3158623.0
-Jim Allevinah,Angers,Ligue 1,"FW,DF",19.4,33.81,36.67,-2.86,1897488.0
 Shuto Machino,Gladbach,Bundesliga,"FW,MF",21.7,45.71,48.57,-2.86,2614831.0
+Jim Allevinah,Angers,Ligue 1,"FW,DF",19.4,33.81,36.67,-2.86,1897488.0
 Philipp Treu,Freiburg,Bundesliga,"DF,FW",32.0,53.21,56.18,-2.97,2834662.0
 Ramy Bensebaini,Dortmund,Bundesliga,DF,22.5,73.35,76.4,-3.05,5218092.0
 Connor Ronan,Colorado Rapids,MLS,MF,11.3,42.25,45.3,-3.05,490000.0
@@ -811,8 +811,8 @@ Miki Yamane,LA Galaxy,MLS,DF,24.6,76.01,79.63,-3.62,778000.0
 Aaron Long,LAFC,MLS,DF,14.1,42.37,45.99,-3.62,445000.0
 Mohamed Salah,Liverpool,Premier League,FW,37.5,94.4,98.04,-3.64,27252189.0
 Benedict Hollerbach,Mainz 05,Bundesliga,"FW,MF",28.2,44.9,48.57,-3.67,2614831.0
-Jon Moncayola,Osasuna,La Liga,MF,23.3,36.98,40.71,-3.73,1030830.0
 Kike Salas,Sevilla,La Liga,DF,24.9,56.01,59.73,-3.73,1288538.0
+Jon Moncayola,Osasuna,La Liga,MF,23.3,36.98,40.71,-3.73,1030830.0
 Brayan Vera,Real Salt Lake,MLS,DF,22.0,49.96,53.7,-3.75,500004.0
 Ariath Piol,Real Salt Lake,MLS,"FW,MF",10.0,14.91,18.68,-3.77,282000.0
 Matheus Cunha,Manchester Utd,Premier League,"MF,FW",28.9,86.32,90.14,-3.82,12263485.0
@@ -889,8 +889,8 @@ Tim Kleindienst,Gladbach,Bundesliga,FW,30.4,59.18,67.14,-7.96,4361908.0
 Carlos Garcés,LA Galaxy,MLS,DF,19.1,35.54,43.52,-7.98,430000.0
 Alejandro Garnacho,Chelsea,Premier League,FW,24.4,56.72,64.71,-7.98,7494352.0
 Anderson Julio,FC Dallas,MLS,"FW,MF",17.5,40.35,48.35,-8.01,750000.0
-Jamie Leweling,Stuttgart,Bundesliga,"FW,DF",18.5,51.84,60.0,-8.16,3713985.0
 Franck Honorat,Gladbach,Bundesliga,"FW,MF",16.0,71.84,80.0,-8.16,5461063.0
+Jamie Leweling,Stuttgart,Bundesliga,"FW,DF",18.5,51.84,60.0,-8.16,3713985.0
 Rodrigues,SJ Earthquakes,MLS,DF,16.5,64.33,72.53,-8.2,700000.0
 Ferrán Torres,Barcelona,La Liga,"FW,MF",12.3,80.31,88.57,-8.27,10308301.0
 Julian Ryerson,Dortmund,Bundesliga,"DF,MF",25.1,72.55,80.9,-8.35,5785024.0
@@ -1054,8 +1054,8 @@ Tomáš Souček,West Ham,Premier League,"MF,FW",28.5,36.42,54.23,-17.81,6131743.
 Francisco Conceição,Juventus,Serie A,"MF,FW",14.9,78.57,96.43,-17.86,8145314.0
 John McGinn,Aston Villa,Premier League,"MF,FW",24.7,51.11,69.01,-17.91,8856961.0
 Juan Jesus,Napoli,Serie A,DF,11.9,30.49,48.56,-18.06,2140459.0
-Thijs Dallinga,Bologna,Serie A,FW,12.8,39.87,58.14,-18.27,3424734.0
 Ange-Yoan Bonny,Inter,Serie A,FW,28.1,51.5,69.77,-18.27,4280918.0
+Thijs Dallinga,Bologna,Serie A,FW,12.8,39.87,58.14,-18.27,3424734.0
 Robert Andrich,Leverkusen,Bundesliga,"DF,MF",17.8,53.05,71.35,-18.3,4361908.0
 Mattia Viti,Fiorentina,Serie A,DF,28.6,30.15,48.56,-18.41,2140459.0
 Alexis Mac Allister,Liverpool,Premier League,MF,28.9,61.17,79.58,-18.41,10219571.0
@@ -1071,8 +1071,8 @@ Andreas Hanche-Olsen,Mainz 05,Bundesliga,DF,14.3,37.32,56.18,-18.86,2834662.0
 Felipe Mora,Portland Timbers,MLS,FW,18.5,40.97,59.89,-18.92,1275000.0
 Giovanni Di Lorenzo,Napoli,Serie A,"DF,MF",37.0,74.79,93.75,-18.96,6432947.0
 Santiago Castro,Bologna,Serie A,CF,25.5,47.62,66.67,-19.05,1076014.0
-Romelu Lukaku,Napoli,Serie A,CF,31.6,80.95,100.0,-19.05,8897367.0
 Angelo Stiller,Stuttgart,Bundesliga,MF,30.5,58.73,77.78,-19.05,5241232.0
+Romelu Lukaku,Napoli,Serie A,CF,31.6,80.95,100.0,-19.05,8897367.0
 Daichi Kamada,Crystal Palace,Premier League,MF,17.4,37.83,57.04,-19.22,7153700.0
 Gonzalo Luján,Inter Miami,MLS,DF,19.4,36.33,55.56,-19.22,526500.0
 Henrikh Mkhitaryan,Inter,Serie A,MF,26.6,62.76,82.14,-19.39,5634613.0
@@ -1105,8 +1105,8 @@ Luca Ranieri,Fiorentina,Serie A,DF,34.1,40.73,61.54,-20.81,2568551.0
 Abel Ruiz,Girona,La Liga,FW,15.0,31.33,52.14,-20.82,1711178.0
 Andrew Robertson,Liverpool,Premier League,DF,27.6,68.47,89.36,-20.9,10900876.0
 Aleksei Miranchuk,Atlanta Utd,MLS,"MF,FW",30.5,76.19,97.44,-21.25,3600000.0
-Jeremie Boga,Nice,Ligue 1,"FW,MF",11.7,48.57,70.0,-21.43,4628019.0
 James Maddison,Tottenham,Premier League,AM,20.1,78.57,100.0,-21.43,11582180.0
+Jeremie Boga,Nice,Ligue 1,"FW,MF",11.7,48.57,70.0,-21.43,4628019.0
 Jesús Ferreira,Seattle Sounders,MLS,"FW,MF",24.2,51.02,72.53,-21.51,1585227.0
 Kristijan Jakić,Augsburg,Bundesliga,"MF,DF",25.6,24.38,46.03,-21.66,2614831.0
 Cristiano Biraghi,Torino,Serie A,"DF,MF",12.9,51.79,73.56,-21.77,3644565.0
@@ -1224,8 +1224,8 @@ Alessandro Bastoni,Inter,Serie A,DF,26.7,70.33,100.0,-29.67,11789879.0
 Gastón Brugman,Nashville SC,MLS,MF,14.2,52.32,82.05,-29.73,1200000.0
 Danilo Cataldi,Lazio,Serie A,MF,19.2,32.14,61.9,-29.76,3216473.0
 Mikel Oyarzabal,Real Sociedad,La Liga,FW,25.0,44.49,74.29,-29.8,3710988.0
-Marc Bartra,Betis,La Liga,DF,23.3,42.98,73.01,-30.03,2144127.0
 Daniel Parejo,Villarreal,La Liga,MF,25.3,48.29,78.32,-30.03,3216190.0
+Marc Bartra,Betis,La Liga,DF,23.3,42.98,73.01,-30.03,2144127.0
 Jonathan Gradit,Lens,Ligue 1,DF,23.5,36.03,66.18,-30.15,3158623.0
 Tanguy Ndombele,Nice,Ligue 1,"MF,FW",12.6,59.71,90.0,-30.29,6305676.0
 Sam Surridge,Nashville SC,MLS,FW,32.6,54.32,84.62,-30.3,2775000.0
@@ -1395,8 +1395,8 @@ David Romney,SJ Earthquakes,MLS,DF,29.7,36.77,85.8,-49.03,858500.0
 Amadou Haidara,RB Leipzig,Bundesliga,MF,14.7,31.52,80.95,-49.43,5680894.0
 Pablo Marí,Fiorentina,Serie A,DF,12.2,9.68,59.13,-49.45,2371860.0
 Manuel Locatelli,Juventus,Serie A,MF,31.4,41.67,91.67,-50.0,7069299.0
-Robert Lewandowski,Barcelona,La Liga,FW,29.6,50.0,100.0,-50.0,34357567.0
 Benjamin Henrichs,RB Leipzig,Bundesliga,RB,10.4,50.0,100.0,-50.0,8735386.0
+Robert Lewandowski,Barcelona,La Liga,FW,29.6,50.0,100.0,-50.0,34357567.0
 André Gomes,Lille,Ligue 1,MF,14.2,30.71,81.0,-50.29,5264372.0
 Marash Kumbulla,Espanyol,La Liga,DF,33.0,33.31,83.63,-50.32,3865613.0
 Virgil van Dijk,Liverpool,Premier League,DF,37.0,49.54,100.0,-50.46,23845665.0

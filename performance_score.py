@@ -67,7 +67,9 @@ def add_salary_gap(df):
 
 def results_table(df):
     """What gets saved to performance_score_results.csv."""
-    return df.sort_values("gap", ascending=False)[["Player", "Squad_x", "League", "Pos_x", "90s",
+    # Stable sort: players with the same gap keep their order from the dataset,
+    # so the CSV comes out identical on every computer
+    return df.sort_values("gap", ascending=False, kind="stable")[["Player", "Squad_x", "League", "Pos_x", "90s",
         "performance_score", "salary_percentile", "gap", "Annual USD"]].round(2)
 
 
