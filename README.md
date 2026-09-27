@@ -24,7 +24,7 @@ So I took the column out.
 
 > **My model wasn't learning who was good. It was learning who already got paid.**
 
-![Bar chart: the same five-model ensemble is off by $20,016 per player with guaranteed compensation and $199,769 without it, about 10 times more](leakage_comparison.png)
+![Bar chart: the same five-model ensemble is off by $20,014 per player with guaranteed compensation and $200,689 without it, about 10 times more](leakage_comparison.png)
 
 On the same held-out players, the ensemble of five models is off by about **$20,000** per player with `guaranteed_compensation` and about **$200,000** without it. That's **10x** the error. Its R² goes from **0.99 to -0.06**, which means that without the column it predicts base salary no better than guessing the average. Random Forest's test MSE went from about 1.8 billion to about 449 billion.
 
@@ -51,9 +51,9 @@ Two things came out of this:
 
 To test this properly, I built a second model that predicts salary **only** from on-field stats (minutes, goals, assists, xG, xAG, progressive carries/passes/receptions) on a dataset of players from Europe's big leagues (plus MLS).
 
-It got much worse, and that's the honest result. On players it hasn't seen, my best single model (Random Forest) is off by about **$2.4 million** per player on average (test MSE about 1.3 × 10¹³, which is a typical miss of about $3.6M). The stacked models explain about **20%** of the variation in salary (R² 0.20 for the meta neural network). Stats alone don't explain pay.
+It got much worse, and that's the honest result. On players it hasn't seen, my best single model (Random Forest) is off by about **$2.4 million** per player on average (test MSE about 1.3 × 10¹³, which is a typical miss of about $3.6M). The stacked models explain about **20%** of the variation in salary (R² 0.21 for the meta neural network). Stats alone don't explain pay.
 
-The biggest misses are fun, though. The model thought Virgil van Dijk (paid about $24.7M in the data) should be making about $5M, and it thought Raheem Sterling (about $22.1M) should be making under $3M. In the other direction, it expected $6.6M or more for Karol Mets, who is paid about $760K. Some of that is probably the model being wrong (stats like these say little about defending), and some may be real gaps between pay and production. I can't tell which yet, and I think that's the actual research question.
+The biggest misses are fun, though. My best single model (Random Forest) thought Virgil van Dijk (paid about $24.7M in the data) should be making about $5.8M, and it thought Raheem Sterling (about $22.1M) should be making about $1.6M. In the other direction, it expected about $8.4M for Karol Mets, who is paid about $760K. Some of that is probably the model being wrong (stats like these say little about defending), and some may be real gaps between pay and production. I can't tell which yet, and I think that's the actual research question.
 
 ## Project 3: scoring players without using salary
 
@@ -146,7 +146,7 @@ pytest
 An earlier version of this project had problems that I found and fixed:
 - **The with/without comparison used different test players.** One run had no fixed seed and the other used `random_state=42`. Now both use the same split.
 - **Players appeared in both training and testing.** See "Testing my own test." Both projects now split by player.
-- **The meta neural network predicted salaries of about $100.** Its inputs were scaled but its target (salaries in the millions) was not. It now scales the target too, and it scores hyperparameters with cross-validation, not on the data it trained on. It now has a test MAE of about $2.4M and R² of 0.20, in line with the other models.
+- **The meta neural network predicted salaries of about $100.** Its inputs were scaled but its target (salaries in the millions) was not. It now scales the target too, and it scores hyperparameters with cross-validation, not on the data it trained on. It now has a test MAE of about $2.4M and R² of 0.21, in line with the other models.
 - **Percent error gave misleading rankings.** It explodes for cheap players and rewarded a model that predicted near zero. Comparisons now use MAE, RMSE, MSE and R², in dollars.
 - **Notebook cells had been run out of order.** Both notebooks now run cleanly top to bottom.
 
