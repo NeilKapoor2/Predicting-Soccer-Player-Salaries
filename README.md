@@ -87,8 +87,17 @@ The notebooks are my original step-by-step work, saved with their outputs from a
 
 ## How to run it
 
+Set up a virtual environment first, so you get the exact library versions I used (an older Streamlit or scikit-learn installed elsewhere on your computer can break things or change results):
+
 ```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+Then run the projects:
+
+```bash
 python predicting_player_salaries.py
 python performance_based_salaries.py
 python performance_score.py

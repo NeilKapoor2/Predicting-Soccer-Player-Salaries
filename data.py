@@ -6,7 +6,6 @@ the train/test split are written once and are identical everywhere.
 
 import os
 
-import kagglehub
 import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit
 
@@ -14,12 +13,19 @@ MLS_DATASET = "crawford/us-major-league-soccer-salaries"
 BIG_LEAGUES_DATASET = "armaanmartins21/undervalued-football-players"
 
 
+def _download(dataset):
+    # Imported here, not at the top, so code that only reads dfAll.csv
+    # (the Streamlit app and the tests) works without kagglehub installed
+    import kagglehub
+    return kagglehub.dataset_download(dataset)
+
+
 def load_mls():
     """MLS salaries, one row per player-season, rows with missing values dropped.
 
     Used by Project 1 and split_comparison.py. Returns (df, rows_dropped).
     """
-    path = kagglehub.dataset_download(MLS_DATASET)
+    path = _download(MLS_DATASET)
 
     # One CSV per season. Store the season as a column.
     seasons = []
@@ -40,7 +46,7 @@ def load_big_leagues():
 
     Used by Projects 2 and 3. dfAll.csv in this repo is a reference copy.
     """
-    path = kagglehub.dataset_download(BIG_LEAGUES_DATASET)
+    path = _download(BIG_LEAGUES_DATASET)
     csv_file = [file for file in os.listdir(path) if file.endswith(".csv")][0]
     return pd.read_csv(os.path.join(path, csv_file))
 
