@@ -76,9 +76,15 @@ def player_label(i):
     return label
 
 
-# ----- Filters (left pane) -----
+# ----- Left pane: player picker on top, filters below -----
+# The picker's list depends on the filters, so reserve its spot at the top
+# first and fill it in after the filters have been read.
+player_slot = st.sidebar.container()
+
 with st.sidebar:
-    st.header("Filters")
+    st.divider()
+    st.subheader("Filters")
+    st.caption("Narrow the player list and the table below.")
     leagues = st.multiselect("League", sorted(scores["League"].unique()))
     positions = st.multiselect("Position group", sorted(scores["position_group"].unique()))
 
@@ -88,8 +94,8 @@ if leagues:
 if positions:
     shown = shown[shown["position_group"].isin(positions)]
 
-# The player list only offers players that match the league/position filters
-with st.sidebar:
+with player_slot:
+    st.header("Find a player")
     row_id = st.selectbox("Player", shown.sort_values("Player").index, format_func=player_label,
                           index=None, placeholder="Type a name...")
 
@@ -101,7 +107,7 @@ if shown.empty:
     st.info("No players match these filters.")
 else:
     if row_id is None:
-        st.info("Pick a player in the **Player** box on the left to see how their pay "
+        st.info("Pick a player at the top of the left pane to see how their pay "
                 "compares with their production.")
 
     if row_id is not None:
