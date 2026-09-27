@@ -3,37 +3,35 @@
 Run locally:   streamlit run app.py
 
 The app uses the same functions as performance_score.py, so it always shows
-exactly what the analysis computes. It reads dfAll.csv (identical to the
-Kaggle file), so it loads fast and needs no Kaggle login.
+exactly what the analysis computes. It downloads the Kaggle data with
+kagglehub on first load (no Kaggle login needed) and caches it.
 """
-
-from pathlib import Path
 
 import altair as alt
 import pandas as pd
 import streamlit as st
 
+from data import load_big_leagues
 from flags import FLAGS, GAP_THRESHOLD, MIXED, NO_FLAG, OVERPAID, UNDERPAID, add_flags
 from performance_score import add_salary_gap, score_players, select_players, stat_percentiles
 from salary_model import train_salary_model
 from scout import (CONFIDENCE_RULES, FAIR, HIGH, LOW, MEDIUM, OVERPAID as SCOUT_OVERPAID, UNCLEAR,
                    UNDERPAID as SCOUT_UNDERPAID, percentile_among, score_new_player, verdict)
 
-DATA_FILE = Path(__file__).parent / "dfAll.csv"
 REPO_URL = "https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries"
 
 
 @st.cache_data
 def load_scores():
     """Every eligible player with performance score, salary percentile, gap and flag."""
-    df = pd.read_csv(DATA_FILE)
+    df = load_big_leagues()
     return add_flags(add_salary_gap(score_players(select_players(df))), train_salary_model(df))
 
 
 @st.cache_resource
 def load_salary_model():
     """Project 2's linear regression (see salary_model.py)."""
-    return train_salary_model(pd.read_csv(DATA_FILE))
+    return train_salary_model(load_big_leagues())
 
 
 STAT_NAMES = {

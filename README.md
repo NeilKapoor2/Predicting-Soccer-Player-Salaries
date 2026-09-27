@@ -80,11 +80,10 @@ The biggest misses are fun, though. The model thought Virgil van Dijk (paid abou
 | `leakage_comparison.png` | The chart above (made by the Project 1 script and notebook) |
 | `tests/` | Automated checks that run on every push (see "Tests") |
 | `requirements.txt` | Python libraries, with the exact versions I ran |
-| `dfAll.csv` | Reference copy of the Kaggle file Projects 2 and 3 use (the scripts download it themselves with `kagglehub`) |
 
 The notebooks are my original step-by-step work, saved with their outputs from a clean top-to-bottom run. The `.py` scripts run the same experiments as cleaned-up code: the shared steps live in `data.py` and `evaluation.py`, and each script trains its models from one list instead of a copy-pasted block per model. The scripts print a short summary table instead of a line for every player.
 
-**Data:** [US Major League Soccer Salaries](https://www.kaggle.com/datasets/crawford/us-major-league-soccer-salaries) (5,509 player-seasons for 1,995 different players, after dropping missing values) and [Undervalued Football Players](https://www.kaggle.com/datasets/armaanmartins21/undervalued-football-players) (2,831 rows, 2,473 different player names).
+**Data:** [US Major League Soccer Salaries](https://www.kaggle.com/datasets/crawford/us-major-league-soccer-salaries) (5,509 player-seasons for 1,995 different players, after dropping missing values) and [Undervalued Football Players](https://www.kaggle.com/datasets/armaanmartins21/undervalued-football-players) (2,831 rows, 2,473 different player names). The data files aren't included in this repo, because their license on Kaggle is unknown. The scripts, the app and the tests download them with `kagglehub` (no Kaggle login needed for these public datasets).
 
 **Models (Projects 1 and 2):** Linear Regression, Decision Tree, Random Forest, K-Nearest Neighbors, Neural Network (MLP), and ensembles. Everything uses `random_state=42`. Both projects split by player so no player is in two sets. Project 1 uses 80/20 train/test. Project 2 uses 64/16/20 train/validation/test and picks hyperparameters on the validation set.
 
@@ -123,7 +122,7 @@ Some of this project's claims depend on rules that are easy to break by accident
 - The saved `performance_score_results.csv` still matches what the code produces.
 - The error measures behave as described (for example, predicting the average gives R² = 0).
 
-The tests use `dfAll.csv`, so they don't need a Kaggle login. To run them yourself:
+The tests download the same public Kaggle data as the scripts (no Kaggle login needed). To run them yourself:
 
 ```bash
 pip install -r requirements-dev.txt

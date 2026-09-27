@@ -14,8 +14,8 @@ BIG_LEAGUES_DATASET = "armaanmartins21/undervalued-football-players"
 
 
 def _download(dataset):
-    # Imported here, not at the top, so code that only reads dfAll.csv
-    # (the Streamlit app and the tests) works without kagglehub installed
+    # Imported here, not at the top, so modules that never download
+    # anything don't need kagglehub installed
     import kagglehub
     return kagglehub.dataset_download(dataset)
 
@@ -44,7 +44,8 @@ def load_mls():
 def load_big_leagues():
     """Players from Europe's big leagues (plus MLS) with stats and salaries.
 
-    Used by Projects 2 and 3. dfAll.csv in this repo is a reference copy.
+    Used by Projects 2 and 3, the app and the tests. It is a public dataset,
+    so no Kaggle login is needed; kagglehub caches it after the first download.
     """
     path = _download(BIG_LEAGUES_DATASET)
     csv_file = [file for file in os.listdir(path) if file.endswith(".csv")][0]

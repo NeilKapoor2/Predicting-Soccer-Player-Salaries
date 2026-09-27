@@ -13,11 +13,10 @@ model's test-set error, so the app can show how uncertain a prediction is.
 
 from dataclasses import dataclass
 
-import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-from data import split_train_val_test
+from data import load_big_leagues, split_train_val_test
 
 STATS = ["MP", "Starts", "Min", "90s", "Gls", "Ast", "G+A",
          "xG", "xAG", "PrgC", "PrgP", "PrgR"]
@@ -66,7 +65,7 @@ def fit_project2_linear_regression(df):
 
 
 def train_salary_model(df):
-    """df is the big-leagues data, e.g. pd.read_csv("dfAll.csv")."""
+    """df is the big-leagues data, from data.load_big_leagues()."""
     model, X_test, y_test = fit_project2_linear_regression(df)
     test_predictions = model.predict(X_test)
     return SalaryModel(
@@ -79,7 +78,7 @@ def train_salary_model(df):
 
 if __name__ == "__main__":
     # Print the model so you can see what each stat is "worth" to it
-    salary_model = train_salary_model(pd.read_csv("dfAll.csv"))
+    salary_model = train_salary_model(load_big_leagues())
     print(f"Starting value (intercept): ${salary_model.intercept:,.0f}")
     for stat, weight in salary_model.weights.items():
         print(f"  {stat:7} {weight:>+14,.0f} per 1")

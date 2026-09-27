@@ -20,3 +20,5 @@ env/
 # Secrets (Kaggle API token, env files)
 .env
 kaggle.json
+# Kaggle data is downloaded with kagglehub, not committed (its license is unknown)
+dfAll.csv
