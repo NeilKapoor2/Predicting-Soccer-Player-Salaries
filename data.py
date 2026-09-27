@@ -70,3 +70,14 @@ def split_by_player(player_id, test_size=0.2, random_state=42):
     # Sanity check: no player appears in both sets
     assert set(player_id.iloc[train]).isdisjoint(set(player_id.iloc[test]))
     return train, test
+
+
+def split_train_val_test(player_id, random_state=42):
+    """Project 2's split by player: 64% train, 16% validation, 20% test.
+
+    First 80/20 into train+validation vs test, then 80/20 of the first part.
+    Returns (train, val, test) row positions into player_id.
+    """
+    train_val, test = split_by_player(player_id, random_state=random_state)
+    train, val = split_by_player(player_id.iloc[train_val], random_state=random_state)
+    return train_val[train], train_val[val], test

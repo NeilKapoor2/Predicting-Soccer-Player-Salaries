@@ -72,6 +72,7 @@ The biggest misses are fun, though. The model thought Virgil van Dijk (paid abou
 | `performance_score.py` / `performance_score_results.csv` | Project 3: a performance score that never sees salary, and its results |
 | `split_comparison.py` | The experiment comparing random splits with by-player splits |
 | `app.py` | A Streamlit app for exploring the performance score (Project 3) |
+| `salary_model.py` | Project 2's linear regression as plain numbers (a starting value plus one weight per stat), for the app |
 | `data.py` | Shared code: loads both datasets and splits them by player, so every project prepares data the same way |
 | `evaluation.py` | Shared code: error measures in dollars (MAE, RMSE, MSE) and R², and the results tables |
 | `leakage_comparison.png` | The chart above (made by the Project 1 script and notebook) |
@@ -163,7 +164,7 @@ Next I want to improve the performance score with defensive stats and position-s
 
 ## AI note
 
-AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, to set up the starting structure of `app.py`, and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
+AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, to set up the starting structure of `app.py`, to write `salary_model.py` (a helper that exposes Project 2's linear regression to the app), and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
 
 ## License
 

@@ -21,7 +21,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
-from data import load_big_leagues, split_by_player
+from data import load_big_leagues, split_train_val_test
 from evaluation import dollars, print_biggest_misses, print_comparison
 
 STATS = ["MP", "Starts", "Min", "90s", "Gls", "Ast", "G+A",
@@ -61,15 +61,10 @@ X = df[STATS]
 y = df[TARGET]
 player_id = df["Player"]
 
-# Split by player: 64% train, 16% validation, 20% test (random_state=42).
-# First 80/20 into train+validation vs test, then 80/20 of the first part.
-train_val_idx, test_idx = split_by_player(player_id)
-train_idx, val_idx = split_by_player(player_id.iloc[train_val_idx])
-
-X_train_val, y_train_val = X.iloc[train_val_idx], y.iloc[train_val_idx]
-X_train, X_val = X_train_val.iloc[train_idx], X_train_val.iloc[val_idx]
-y_train, y_val = y_train_val.iloc[train_idx], y_train_val.iloc[val_idx]
-X_test, y_test = X.iloc[test_idx], y.iloc[test_idx]
+# Split by player: 64% train, 16% validation, 20% test (random_state=42)
+train_idx, val_idx, test_idx = split_train_val_test(player_id)
+X_train, X_val, X_test = X.iloc[train_idx], X.iloc[val_idx], X.iloc[test_idx]
+y_train, y_val, y_test = y.iloc[train_idx], y.iloc[val_idx], y.iloc[test_idx]
 
 # No player appears in more than one set
 assert set(player_id.loc[X_val.index]).isdisjoint(player_id.loc[X_test.index])
