@@ -63,22 +63,6 @@ st.title("Does salary measure skill?")
 st.caption(f"A performance score built without ever looking at pay. [How it works]({REPO_URL})")
 
 
-# ----- Filters -----
-with st.sidebar:
-    st.header("Filters")
-    leagues = st.multiselect("League", sorted(scores["League"].unique()))
-    positions = st.multiselect("Position group", sorted(scores["position_group"].unique()))
-
-shown = scores
-if leagues:
-    shown = shown[shown["League"].isin(leagues)]
-if positions:
-    shown = shown[shown["position_group"].isin(positions)]
-
-
-# ----- Player lookup -----
-st.header("Look up a player")
-
 salary_model = load_salary_model()
 percentiles = stat_percentiles(scores)   # ranked against ALL peers, not just the filtered ones
 repeated_names = set(scores.loc[scores["Player"].duplicated(), "Player"])
@@ -92,11 +76,33 @@ def player_label(i):
     return label
 
 
+# ----- Filters (left pane) -----
+with st.sidebar:
+    st.header("Filters")
+    leagues = st.multiselect("League", sorted(scores["League"].unique()))
+    positions = st.multiselect("Position group", sorted(scores["position_group"].unique()))
+
+shown = scores
+if leagues:
+    shown = shown[shown["League"].isin(leagues)]
+if positions:
+    shown = shown[shown["position_group"].isin(positions)]
+
+# The player list only offers players that match the league/position filters
+with st.sidebar:
+    row_id = st.selectbox("Player", shown.sort_values("Player").index, format_func=player_label,
+                          index=None, placeholder="Type a name...")
+
+
+# ----- Player lookup -----
+st.header("Look up a player")
+
 if shown.empty:
     st.info("No players match these filters.")
 else:
-    row_id = st.selectbox("Player", shown.sort_values("Player").index, format_func=player_label,
-                          index=None, placeholder="Type a name...")
+    if row_id is None:
+        st.info("Pick a player in the **Player** box on the left to see how their pay "
+                "compares with their production.")
 
     if row_id is not None:
         player = scores.loc[row_id]
