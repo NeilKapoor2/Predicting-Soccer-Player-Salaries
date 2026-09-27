@@ -1,6 +1,6 @@
 import pandas as pd
 
-from data import mls_player_id, split_by_player
+from data import mls_player_id, split_by_player, split_train_val_test
 
 
 def test_no_player_is_in_both_train_and_test(big_leagues):
@@ -28,17 +28,16 @@ def test_split_is_the_same_every_run(big_leagues):
 
 
 def test_project_2_three_way_split_has_no_shared_players(big_leagues):
-    # Same two-step split as performance_based_salaries.py: 64/16/20
     player_id = big_leagues["Player"]
-    train_val, test = split_by_player(player_id)
-    train, val = split_by_player(player_id.iloc[train_val])
+    train, val, test = split_train_val_test(player_id)
 
-    train_players = set(player_id.iloc[train_val].iloc[train])
-    val_players = set(player_id.iloc[train_val].iloc[val])
+    train_players = set(player_id.iloc[train])
+    val_players = set(player_id.iloc[val])
     test_players = set(player_id.iloc[test])
     assert train_players.isdisjoint(val_players)
     assert train_players.isdisjoint(test_players)
     assert val_players.isdisjoint(test_players)
+    assert len(train) + len(val) + len(test) == len(big_leagues)
 
 
 def test_mls_player_id_is_the_full_name():
