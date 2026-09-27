@@ -133,7 +133,7 @@ STYLE = """
       text-transform:uppercase; color:var(--muted); }
   /* Tabs as the sample's pill buttons */
   .stTabs [data-baseweb="tab-list"] { gap:6px; }
-  .stTabs [role="tab"] { padding:9px 18px !important; border-radius:999px !important;
+  .stTabs [role="tab"] { padding:8px 14px !important; border-radius:999px !important;
       height:auto !important; color:var(--muted); }
   .stTabs [role="tab"] p { font-family:"Barlow Condensed",sans-serif !important; font-weight:600;
       letter-spacing:.08em; text-transform:uppercase; font-size:15px !important; }
@@ -208,7 +208,7 @@ player_slot = st.sidebar.container()
 with st.sidebar:
     st.divider()
     st.subheader("Filters")
-    st.caption("Narrow the player list and the table below.")
+    st.caption("Narrow the player list and the All players tab.")
     leagues = st.multiselect("League", sorted(scores["League"].unique()))
     positions = st.multiselect("Position group", sorted(scores["position_group"].unique()))
     flag_counts = scores["flag"].value_counts()
@@ -230,8 +230,8 @@ with player_slot:
                           index=None, placeholder="Type a name...")
 
 
-# ----- Tabs: look up a real player, or scout a made-up one -----
-tab_lookup, tab_scout = st.tabs(["Look up a player", "Scout a new player"])
+# ----- Tabs: look up a real player, scout a made-up one, or browse everyone -----
+tab_lookup, tab_scout, tab_all = st.tabs(["Look up an existing player", "Scout a new player", "All players"])
 
 # ----- Tab 1: player lookup -----
 with tab_lookup:
@@ -483,26 +483,27 @@ with tab_scout:
 # or use matplotlib like the README chart. Which players do you label?
 
 
-# ----- Full table (working example, so the app can be deployed now) -----
-st.subheader(f"{len(shown):,} players")
-st.dataframe(
-    shown.sort_values("gap", ascending=False)[
-        ["Player", "Squad_x", "League", "Pos_x", "performance_score", "salary_percentile", "gap", "flag",
-         "Annual USD"]
-    ],
-    hide_index=True,
-    width="stretch",
-    column_config={
-        "Squad_x": "Club",
-        "Pos_x": "Position",
-        "performance_score": st.column_config.NumberColumn("Performance score", format="%.0f"),
-        "salary_percentile": st.column_config.NumberColumn("Salary percentile", format="%.0f"),
-        "gap": st.column_config.NumberColumn("Gap", format="%+.0f",
-                                             help="Positive: plays better than the pay suggests"),
-        "flag": st.column_config.TextColumn("Flag", help="Only when the score and the salary model agree"),
-        "Annual USD": st.column_config.NumberColumn("Salary (USD)", format="dollar"),
-    },
-)
+# ----- Tab 3: every player (the sidebar filters apply) -----
+with tab_all:
+    st.subheader(f"{len(shown):,} players")
+    st.dataframe(
+        shown.sort_values("gap", ascending=False)[
+            ["Player", "Squad_x", "League", "Pos_x", "performance_score", "salary_percentile", "gap", "flag",
+             "Annual USD"]
+        ],
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Squad_x": "Club",
+            "Pos_x": "Position",
+            "performance_score": st.column_config.NumberColumn("Performance score", format="%.0f"),
+            "salary_percentile": st.column_config.NumberColumn("Salary percentile", format="%.0f"),
+            "gap": st.column_config.NumberColumn("Gap", format="%+.0f",
+                                                 help="Positive: plays better than the pay suggests"),
+            "flag": st.column_config.TextColumn("Flag", help="Only when the score and the salary model agree"),
+            "Annual USD": st.column_config.NumberColumn("Salary (USD)", format="dollar"),
+        },
+    )
 
 
 # ----- Caveats -----
