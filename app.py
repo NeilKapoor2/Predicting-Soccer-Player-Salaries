@@ -30,8 +30,6 @@ st.set_page_config(page_title="Does salary measure skill?", page_icon="⚽", lay
 scores = load_scores()
 
 # ----- Header -----
-# TODO (you): write the intro in your own words. What should someone
-# understand in the first 10 seconds? Link back to the README story.
 st.title("Does salary measure skill?")
 st.caption(f"A performance score built without ever looking at pay. [How it works]({REPO_URL})")
 
@@ -50,7 +48,7 @@ if positions:
 
 
 # ----- Player lookup -----
-# TODO (you): the core view. Some questions to decide:
+# TODO : the core view. Some questions to decide:
 #   - Pick a player from a search box (st.selectbox) and show what?
 #     Score, salary percentile and gap as st.metric cards? Their 7 stats?
 #   - How do you explain what a "gap of +40" means to a non-expert?
@@ -84,8 +82,7 @@ st.dataframe(
 
 
 # ----- Caveats -----
-# TODO (you): rewrite in your voice. Being upfront about limits is one of the
-# best things about this project, so keep it visible.
+
 st.caption(
     "The score uses 7 attacking and ball-progression stats per 90 minutes, ranked "
     "against players in the same league and position. It can't see defending, age, "
