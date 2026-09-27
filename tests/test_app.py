@@ -142,3 +142,12 @@ def test_all_players_tab_has_its_own_filters():
     assert len(table) == 105 and (table["flag"] == "Possibly underpaid").all()
     # The lookup tab's player list is unaffected
     assert len(app.selectbox(key="player-picker").options) == 1472
+
+
+def test_ordinal_suffixes():
+    source = (REPO / "app.py").read_text()
+    namespace = {}
+    exec(source[source.index("def ordinal"):source.index("def millions")], namespace)
+    ordinal = namespace["ordinal"]
+    assert [ordinal(n) for n in [1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 70, 100, 3.4]] == \
+        ["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "23rd", "70th", "100th", "3rd"]
