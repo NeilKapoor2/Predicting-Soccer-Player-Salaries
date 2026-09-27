@@ -46,13 +46,20 @@ def score_players(df):
     for col in stat_columns:
         df[col + "_per90"] = df[col] / df["90s"]
 
-    # Percentile rank (0-100) of each stat within the peer group
+    # Performance score = average percentile across the stats
+    df["performance_score"] = stat_percentiles(df).mean(axis=1)
+    return df
+
+
+def stat_percentiles(df):
+    """Percentile rank (0-100) of each per-90 stat within the player's peer group.
+
+    Needs the *_per90 columns that score_players() adds. One column per stat.
+    """
     per90_columns = [col + "_per90" for col in stat_columns]
     percentiles = df.groupby(peers)[per90_columns].rank(pct=True) * 100
-
-    # Performance score = average percentile across the stats
-    df["performance_score"] = percentiles.mean(axis=1)
-    return df
+    percentiles.columns = stat_columns
+    return percentiles
 
 
 def add_salary_gap(df):
