@@ -132,3 +132,13 @@ def test_scout_low_salary_star_forward_is_underpaid():
     assert not app.exception
     stamp = next(block.value for block in app.markdown if "confidence</span>" in block.value)
     assert ">Underpaid<" in stamp
+
+
+def test_all_players_tab_has_its_own_filters():
+    app = run_app()
+    app.multiselect(key="all-flag").select("Possibly underpaid").run()
+    assert not app.exception
+    table = app.dataframe[0].value
+    assert len(table) == 105 and (table["flag"] == "Possibly underpaid").all()
+    # The lookup tab's player list is unaffected
+    assert len(app.selectbox(key="player-picker").options) == 1472
