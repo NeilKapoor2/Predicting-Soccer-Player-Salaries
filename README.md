@@ -2,6 +2,8 @@
 
 [![tests](https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries/actions/workflows/tests.yml/badge.svg)](https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries/actions/workflows/tests.yml)
 
+**Try the app:** [does-salary-measure-skill.streamlit.app](https://does-salary-measure-skill.streamlit.app/). Look up any of 1,472 players, or scout a made-up one. (If it's been asleep, give it about 30 seconds to wake up.)
+
 **I trained a model to predict MLS salaries and got an R² of 0.99. Then I figured out it was cheating.**
 
 **The short version:** I trained models to predict soccer salaries and got 99% accuracy, then found the model was cheating with a column that was nearly the answer. Removing it showed that salary tracks contracts and negotiation more than skill, so I'm now trying to measure players without using pay.
