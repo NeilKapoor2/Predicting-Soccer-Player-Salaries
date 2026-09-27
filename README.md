@@ -161,10 +161,10 @@ An earlier version of this project had problems that I found and fixed:
 
 This started as a soccer question, but the same problem shows up anywhere a number stands in for a person: hiring, rankings, who gets scouted and who gets overlooked. If the number was biased to begin with, a model trained on it will be biased too, just with more confidence.
 
-Next I want to improve the performance score with defensive stats and position-specific weights, then check whether the players it flags actually move clubs or get raises later.
-
 ## Things I might work on next
 
+- Improve the performance score with defensive stats and position-specific weights.
+- Check whether the players it flags actually move clubs or get raises later.
 - Adding the league as an input to the salary model would let it know that Premier League players earn more.
 
 ## AI note
