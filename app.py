@@ -225,7 +225,7 @@ def filter_controls(columns, prefix):
 
 
 # ----- Tabs: look up a real player, scout a made-up one, or browse everyone -----
-tab_lookup, tab_scout, tab_all = st.tabs(["Look up an existing player", "Scout a new player", "All players"])
+tab_lookup, tab_scout, tab_all = st.tabs(["Look up an existing player", "Scout a new player", "All existing players"])
 
 # ----- Tab 1: player lookup -----
 with tab_lookup:
