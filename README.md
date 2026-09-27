@@ -71,6 +71,7 @@ The biggest misses are fun, though. The model thought Virgil van Dijk (paid abou
 | `performance_based_salaries.py` / `Performance_Based_Salaries.ipynb` | Project 2: salaries from on-field stats only |
 | `performance_score.py` / `performance_score_results.csv` | Project 3: a performance score that never sees salary, and its results |
 | `split_comparison.py` | The experiment comparing random splits with by-player splits |
+| `app.py` | A Streamlit app for exploring the performance score (Project 3) |
 | `data.py` | Shared code: loads both datasets and splits them by player, so every project prepares data the same way |
 | `evaluation.py` | Shared code: error measures in dollars (MAE, RMSE, MSE) and R², and the results tables |
 | `leakage_comparison.png` | The chart above (made by the Project 1 script and notebook) |
@@ -92,6 +93,12 @@ python predicting_player_salaries.py
 python performance_based_salaries.py
 python performance_score.py
 python split_comparison.py
+```
+
+To explore the performance score in your browser:
+
+```bash
+streamlit run app.py
 ```
 
 Or open the notebooks in Jupyter or Google Colab (Runtime > Run all). The scripts download the data with `kagglehub`, so you may need to be logged in to Kaggle the first time. I ran everything on Python 3.11 with the versions in `requirements.txt`. Run top to bottom, each notebook and its script printed identical results on my machine. Another machine (or a different number of CPU threads) can shift results in the 4th or 5th digit. Each run takes a few minutes; if a run seems stuck, run one script at a time.
@@ -147,7 +154,7 @@ Next I want to improve the performance score with defensive stats and position-s
 
 ## AI note
 
-AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
+AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, to set up the starting structure of `app.py`, and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
 
 ## License
 
