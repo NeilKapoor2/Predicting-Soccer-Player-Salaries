@@ -18,17 +18,12 @@ def test_app_runs_without_errors():
     assert len(app.dataframe) == 1
 
 
-def test_league_filter_narrows_the_table():
+def test_all_players_tab_shows_everyone_even_when_filtered():
     app = run_app()
     everyone = len(app.dataframe[0].value)
-
-    league = app.multiselect[0].options[0]
-    app.multiselect[0].select(league).run()
-    filtered = app.dataframe[0].value
-
+    app.multiselect[0].select(app.multiselect[0].options[0]).run()
     assert not app.exception
-    assert 0 < len(filtered) < everyone
-    assert (filtered["League"] == league).all()
+    assert len(app.dataframe[0].value) == everyone == 1472
 
 
 # ----- Player view -----
@@ -40,7 +35,7 @@ def scored(big_leagues):
 
 def pick(row_id):
     app = run_app()
-    app.sidebar.selectbox[0].set_value(row_id).run()
+    app.selectbox(key="player-picker").set_value(row_id).run()
     assert not app.exception
     return app
 
@@ -67,7 +62,7 @@ def test_model_guess_matches_salary_model(big_leagues, scored):
 
 def test_repeated_names_can_be_told_apart(scored):
     app = run_app()
-    labels = [app.sidebar.selectbox[0].format_func(i) for i in scored.index[scored["Player"] == "Antony"]]
+    labels = [app.selectbox(key="player-picker").format_func(i) for i in scored.index[scored["Player"] == "Antony"]]
     assert len(set(labels)) == len(labels) == 2
 
 
@@ -91,16 +86,17 @@ def test_what_if_slider_changes_the_guess(scored):
     assert metric(app, "Model's new guess").value != before
 
 
-def test_player_picker_is_in_the_left_pane():
+def test_picker_and_filters_are_in_the_lookup_tab_not_the_left_pane():
     app = run_app()
-    assert [box.label for box in app.sidebar.selectbox] == ["Player"]
+    assert len(app.sidebar.selectbox) == 0 and len(app.sidebar.multiselect) == 0
+    assert app.selectbox(key="player-picker") is not None
 
 
 def test_league_filter_narrows_the_player_list(scored):
     app = run_app()
     league = app.multiselect[0].options[0]
     app.multiselect[0].select(league).run()
-    offered = app.sidebar.selectbox[0].options
+    offered = app.selectbox(key="player-picker").options
     assert len(offered) == (scored["League"] == league).sum()
 
 
@@ -115,8 +111,7 @@ def test_flag_filter_narrows_the_list():
     flag_filter = next(box for box in app.multiselect if box.label == "Scouting flag")
     flag_filter.select("Possibly underpaid").run()
     assert not app.exception
-    assert len(app.sidebar.selectbox[0].options) == 105
-    assert (app.dataframe[0].value["flag"] == "Possibly underpaid").all()
+    assert len(app.selectbox(key="player-picker").options) == 105
 
 
 # ----- Scout a new player -----

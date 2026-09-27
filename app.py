@@ -200,47 +200,40 @@ def player_label(i):
     return label
 
 
-# ----- Left pane: player picker on top, filters below -----
-# The picker's list depends on the filters, so reserve its spot at the top
-# first and fill it in after the filters have been read.
-player_slot = st.sidebar.container()
-
-with st.sidebar:
-    st.divider()
-    st.subheader("Filters")
-    st.caption("Narrow the player list and the All players tab.")
-    leagues = st.multiselect("League", sorted(scores["League"].unique()))
-    positions = st.multiselect("Position group", sorted(scores["position_group"].unique()))
-    flag_counts = scores["flag"].value_counts()
-    flags = st.multiselect("Scouting flag", FLAGS,
-                           format_func=lambda f: f"{f} ({flag_counts.get(f, 0)})",
-                           help="A flag appears only when the performance score and the salary model agree")
-
-shown = scores
-if leagues:
-    shown = shown[shown["League"].isin(leagues)]
-if positions:
-    shown = shown[shown["position_group"].isin(positions)]
-if flags:
-    shown = shown[shown["flag"].isin(flags)]
-
-with player_slot:
-    st.header("Find a player")
-    row_id = st.selectbox("Player", shown.sort_values("Player").index, format_func=player_label,
-                          index=None, placeholder="Type a name...")
-
-
 # ----- Tabs: look up a real player, scout a made-up one, or browse everyone -----
 tab_lookup, tab_scout, tab_all = st.tabs(["Look up an existing player", "Scout a new player", "All players"])
 
 # ----- Tab 1: player lookup -----
 with tab_lookup:
+    # Player search and filters in one row. The search list depends on the
+    # filters, so the filter columns are filled in first.
+    pick_col, league_col, position_col, flag_col = st.columns([2.2, 1, 1, 1.2])
+    leagues = league_col.multiselect("League", sorted(scores["League"].unique()), placeholder="All")
+    positions = position_col.multiselect("Position group", sorted(scores["position_group"].unique()),
+                                         placeholder="All")
+    flag_counts = scores["flag"].value_counts()
+    flags = flag_col.multiselect("Scouting flag", FLAGS, placeholder="All",
+                                 format_func=lambda f: f"{f} ({flag_counts.get(f, 0)})",
+                                 help="A flag appears only when the performance score and the salary model agree")
+
+    shown = scores
+    if leagues:
+        shown = shown[shown["League"].isin(leagues)]
+    if positions:
+        shown = shown[shown["position_group"].isin(positions)]
+    if flags:
+        shown = shown[shown["flag"].isin(flags)]
+
+    row_id = pick_col.selectbox(f"Player ({len(shown):,} match the filters)", shown.sort_values("Player").index,
+                                format_func=player_label, index=None, placeholder="Type a name...",
+                                key="player-picker")
+
 
     if shown.empty:
         st.info("No players match these filters.")
     else:
         if row_id is None:
-            st.info("Pick a player at the top of the left pane (tap » on a phone) to see how "
+            st.info("Pick a player above to see how "
                     "their pay compares with their production.")
 
         if row_id is not None:
@@ -485,9 +478,10 @@ with tab_scout:
 
 # ----- Tab 3: every player (the sidebar filters apply) -----
 with tab_all:
-    st.subheader(f"{len(shown):,} players")
+    st.subheader(f"{len(scores):,} players")
+    st.caption("Search or sort any column. Click the magnifying glass above the table to search.")
     st.dataframe(
-        shown.sort_values("gap", ascending=False)[
+        scores.sort_values("gap", ascending=False)[
             ["Player", "Squad_x", "League", "Pos_x", "performance_score", "salary_percentile", "gap", "flag",
              "Annual USD"]
         ],
