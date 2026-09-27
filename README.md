@@ -163,6 +163,10 @@ This started as a soccer question, but the same problem shows up anywhere a numb
 
 Next I want to improve the performance score with defensive stats and position-specific weights, then check whether the players it flags actually move clubs or get raises later.
 
+## Things I might work on next
+
+- Adding the league as an input to the salary model would let it know that Premier League players earn more.
+
 ## AI note
 
 **AI note:** I built the original models, ran the experiments, and found the data leakage myself. Later I used Claude Code, an AI assistant, to fix the train/test split and a neural-network scaling bug, reorganize the code, write the automated tests, write `performance_score.py`, `split_comparison.py`, `salary_model.py`, `flags.py` and `scout.py`, build the Streamlit app's player view, scouting flags and "Scout a new player" verdict view, and help edit this README. Every number in this README comes from the outputs in this repo.
