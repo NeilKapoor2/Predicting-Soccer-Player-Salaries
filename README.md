@@ -164,7 +164,7 @@ Next I want to improve the performance score with defensive stats and position-s
 
 ## AI note
 
-AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, to set up the starting structure of `app.py`, to write `salary_model.py` (a helper that exposes Project 2's linear regression to the app), and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
+AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, to set up the starting structure of `app.py`, to write `salary_model.py` (a helper that exposes Project 2's linear regression to the app), to write the app's player lookup view, and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
 
 ## License
 
