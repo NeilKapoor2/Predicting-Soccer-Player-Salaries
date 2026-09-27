@@ -1,6 +1,6 @@
 """Performance score: rate players WITHOUT using salary.
 
-Project 2 showed that on-field stats only explain about a quarter of salary.
+Project 2 showed that on-field stats only explain about a fifth of salary (R² 0.20).
 This script turns that around: it scores every player from production alone,
 then compares the score to what the player is paid.
 
@@ -8,15 +8,10 @@ The score never sees "Annual USD". Salary is only used afterwards, to see who
 is paid far above or far below what their production would suggest.
 """
 
-import os
-import numpy as np
-import pandas as pd
-import kagglehub
+from data import load_big_leagues
 
-# Load the same dataset as Project 2
-path = kagglehub.dataset_download("armaanmartins21/undervalued-football-players")
-csv_file = [file for file in os.listdir(path) if file.endswith(".csv")][0]
-df = pd.read_csv(os.path.join(path, csv_file))
+# Same dataset as Project 2
+df = load_big_leagues()
 
 # Stats that go into the score (all measured per 90 minutes)
 stat_columns = ["Gls", "Ast", "xG", "xAG", "PrgC", "PrgP", "PrgR"]

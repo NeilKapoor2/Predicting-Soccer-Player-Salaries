@@ -9,11 +9,8 @@ This script runs Linear Regression and Random Forest on both kinds of split,
 with and without guaranteed_compensation, so the effect can be measured.
 """
 
-import os
 import numpy as np
-import pandas as pd
-import kagglehub
-from sklearn.model_selection import train_test_split, GroupShuffleSplit
+from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
@@ -21,21 +18,14 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_absolute_error
 
-# Same data preparation as predicting_player_salaries.py
-path = kagglehub.dataset_download("crawford/us-major-league-soccer-salaries")
+from data import load_mls, mls_player_id, split_by_player
 
-dfs = []
-for file in os.listdir(path):
-    if file.endswith(".csv"):
-        season = pd.read_csv(os.path.join(path, file))
-        season["year"] = file.replace(".csv", "")
-        dfs.append(season)
-
-df = pd.concat(dfs, ignore_index=True).dropna()
+# Same data as predicting_player_salaries.py
+df, _ = load_mls()
 
 X = df[["club", "first_name", "last_name", "position", "guaranteed_compensation"]]
 y = df["base_salary"]
-player_id = X["first_name"] + " " + X["last_name"]
+player_id = mls_player_id(df)
 
 seasons_per_player = player_id.map(player_id.value_counts())
 print(f"Rows: {len(df)} | unique players: {player_id.nunique()} | "
@@ -43,9 +33,7 @@ print(f"Rows: {len(df)} | unique players: {player_id.nunique()} | "
 
 # Two ways to split the same rows, both with random_state=42
 random_train, random_test = train_test_split(np.arange(len(df)), test_size=0.2, random_state=42)
-group_train, group_test = next(
-    GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42).split(X, y, groups=player_id)
-)
+group_train, group_test = split_by_player(player_id)
 
 for label, train, test in [("random split", random_train, random_test),
                            ("player split", group_train, group_test)]:
