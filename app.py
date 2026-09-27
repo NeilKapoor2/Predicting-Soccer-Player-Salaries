@@ -13,6 +13,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+from flags import FLAGS, GAP_THRESHOLD, MIXED, NO_FLAG, OVERPAID, UNDERPAID, add_flags
 from performance_score import add_salary_gap, score_players, select_players, stat_percentiles
 from salary_model import train_salary_model
 
@@ -22,9 +23,9 @@ REPO_URL = "https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries"
 
 @st.cache_data
 def load_scores():
-    """Every eligible player with performance score, salary percentile and gap."""
+    """Every eligible player with performance score, salary percentile, gap and flag."""
     df = pd.read_csv(DATA_FILE)
-    return add_salary_gap(score_players(select_players(df)))
+    return add_flags(add_salary_gap(score_players(select_players(df))), train_salary_model(df))
 
 
 @st.cache_resource
@@ -41,7 +42,16 @@ STAT_NAMES = {
 POSITION_NAMES = {"FW": "forwards", "MF": "midfielders", "DF": "defenders"}
 # The score only sees attacking and ball-progression stats
 DEFENSIVE_POSITIONS = {"DF", "CB", "LB", "RB", "DM"}
-GAP_THRESHOLD = 25   # about the top and bottom quarter of gaps
+FLAG_COLORS = {UNDERPAID: "var(--more)", OVERPAID: "var(--less)", MIXED: "var(--gold)", NO_FLAG: "var(--even)"}
+FLAG_WHY = {
+    UNDERPAID: "Both methods agree. Worth a closer look: is this a bargain, or is something "
+               "missing, like age, a short contract, or a league the market overlooks?",
+    OVERPAID: "Both methods agree. What might they be missing? Defending, leadership, "
+              "reputation, or past seasons?",
+    MIXED: "The two methods disagree about this player. Worth asking why.",
+    NO_FLAG: "The two methods don't agree on anything strong. That's true for most players, "
+             "and it's a result too.",
+}
 
 
 def money(x):
@@ -183,12 +193,18 @@ with st.sidebar:
     st.caption("Narrow the player list and the table below.")
     leagues = st.multiselect("League", sorted(scores["League"].unique()))
     positions = st.multiselect("Position group", sorted(scores["position_group"].unique()))
+    flag_counts = scores["flag"].value_counts()
+    flags = st.multiselect("Scouting flag", FLAGS,
+                           format_func=lambda f: f"{f} ({flag_counts.get(f, 0)})",
+                           help="A flag appears only when the performance score and the salary model agree")
 
 shown = scores
 if leagues:
     shown = shown[shown["League"].isin(leagues)]
 if positions:
     shown = shown[shown["position_group"].isin(positions)]
+if flags:
+    shown = shown[shown["flag"].isin(flags)]
 
 with player_slot:
     st.header("Find a player")
@@ -228,19 +244,26 @@ else:
                 f"**{player['salary_percentile']:.0f}th**."
             )
 
-            # --- Frame the gap as a question, not a verdict ---
-            if player["gap"] >= GAP_THRESHOLD:
-                callout = stamp("Produces more than the pay suggests",
-                                "Is this a bargain, or is something missing, like age, a short "
-                                "contract, or a league the market overlooks?", "var(--more)")
-            elif player["gap"] <= -GAP_THRESHOLD:
-                callout = stamp("Paid more than production suggests",
-                                "What might the score be missing? Defending, leadership, "
-                                "reputation, or past seasons?", "var(--less)")
-            else:
-                callout = stamp("Pay and production roughly line up",
-                                "Nothing stands out here. That's a result too.", "var(--even)")
-            st.markdown(callout, unsafe_allow_html=True)
+            # --- Scouting flag: only when both methods agree ---
+            low = max(0, player["model_guess"] - salary_model.test_mae)
+            high = player["model_guess"] + salary_model.test_mae
+            flag = player["flag"]
+            title = flag if flag in (MIXED, NO_FLAG) else f"Flag: {flag.lower()}"
+            st.markdown(stamp(title, FLAG_WHY[flag], FLAG_COLORS[flag]), unsafe_allow_html=True)
+
+            score_reading = {1: "points to *underpaid*", -1: "points to *overpaid*",
+                             0: f"within ±{GAP_THRESHOLD}, no signal"}[player["score_signal"]]
+            model_reading = {1: "below the model's range, points to *underpaid*",
+                             -1: "above the model's range, points to *overpaid*",
+                             0: "inside the model's range, no signal"}[player["model_signal"]]
+            st.markdown(
+                f"- **Performance score:** gap of {player['gap']:+.0f} → {score_reading}\n"
+                f"- **Salary model:** actual {money_md(player['Annual USD'])} vs. range "
+                f"{money_md(low)}–{money_md(high)} → {model_reading}"
+            )
+            st.caption("Both methods are built from the same stats, so agreement is stronger "
+                       "evidence, not proof.")
+
             st.markdown(gauge(player["gap"]), unsafe_allow_html=True)
 
             if group in DEFENSIVE_POSITIONS or "DM" in str(player["Pos_x"]):
@@ -272,8 +295,7 @@ else:
 
             # --- The salary model (Project 2) ---
             st.subheader("What a salary model trained on stats would guess")
-            predicted = salary_model.predict(player.to_dict())
-            low, high = max(0, predicted - salary_model.test_mae), predicted + salary_model.test_mae
+            predicted = player["model_guess"]
 
             col1, col2 = st.columns(2)
             col1.metric("Actual salary", money(player["Annual USD"]))
@@ -320,7 +342,8 @@ else:
 st.subheader(f"{len(shown):,} players")
 st.dataframe(
     shown.sort_values("gap", ascending=False)[
-        ["Player", "Squad_x", "League", "Pos_x", "performance_score", "salary_percentile", "gap", "Annual USD"]
+        ["Player", "Squad_x", "League", "Pos_x", "performance_score", "salary_percentile", "gap", "flag",
+         "Annual USD"]
     ],
     hide_index=True,
     width="stretch",
@@ -331,6 +354,7 @@ st.dataframe(
         "salary_percentile": st.column_config.NumberColumn("Salary percentile", format="%.0f"),
         "gap": st.column_config.NumberColumn("Gap", format="%+.0f",
                                              help="Positive: plays better than the pay suggests"),
+        "flag": st.column_config.TextColumn("Flag", help="Only when the score and the salary model agree"),
         "Annual USD": st.column_config.NumberColumn("Salary (USD)", format="dollar"),
     },
 )

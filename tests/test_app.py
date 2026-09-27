@@ -102,3 +102,18 @@ def test_league_filter_narrows_the_player_list(scored):
     app.multiselect[0].select(league).run()
     offered = app.sidebar.selectbox[0].options
     assert len(offered) == (scored["League"] == league).sum()
+
+
+def test_player_view_shows_the_flag(scored):
+    row_id = scored.index[scored["Player"] == "Zavier Gozo"][0]
+    app = pick(row_id)
+    assert any("possibly underpaid" in block.value.lower() for block in app.markdown)
+
+
+def test_flag_filter_narrows_the_list():
+    app = run_app()
+    flag_filter = next(box for box in app.multiselect if box.label == "Scouting flag")
+    flag_filter.select("Possibly underpaid").run()
+    assert not app.exception
+    assert len(app.sidebar.selectbox[0].options) == 105
+    assert (app.dataframe[0].value["flag"] == "Possibly underpaid").all()
