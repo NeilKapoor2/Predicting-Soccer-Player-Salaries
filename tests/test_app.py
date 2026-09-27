@@ -89,3 +89,16 @@ def test_what_if_slider_changes_the_guess(scored):
     app.slider(key=f"Gls-{row_id}").set_value(int(scored.loc[row_id, "Gls"]) + 10).run()
     assert not app.exception
     assert metric(app, "Model's new guess").value != before
+
+
+def test_player_picker_is_in_the_left_pane():
+    app = run_app()
+    assert [box.label for box in app.sidebar.selectbox] == ["Player"]
+
+
+def test_league_filter_narrows_the_player_list(scored):
+    app = run_app()
+    league = app.multiselect[0].options[0]
+    app.multiselect[0].select(league).run()
+    offered = app.sidebar.selectbox[0].options
+    assert len(offered) == (scored["League"] == league).sum()
