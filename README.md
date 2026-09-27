@@ -72,6 +72,8 @@ The biggest misses are fun, though. The model thought Virgil van Dijk (paid abou
 | `performance_score.py` / `performance_score_results.csv` | Project 3: a performance score that never sees salary, and its results |
 | `split_comparison.py` | The experiment comparing random splits with by-player splits |
 | `app.py` | A Streamlit app for exploring the performance score (Project 3) |
+| `scout.py` | The app's "Scout a new player" tab: scores a made-up player with both models and gives a verdict with a confidence level |
+| `flags.py` | Scouting flags for the app: a player is flagged only when the performance score and the salary model agree |
 | `salary_model.py` | Project 2's linear regression as plain numbers (a starting value plus one weight per stat), for the app |
 | `data.py` | Shared code: loads both datasets and splits them by player, so every project prepares data the same way |
 | `evaluation.py` | Shared code: error measures in dollars (MAE, RMSE, MSE) and R², and the results tables |
@@ -164,7 +166,7 @@ Next I want to improve the performance score with defensive stats and position-s
 
 ## AI note
 
-**AI note:** I built the original models, ran the experiments, and found the data leakage myself. Later I used Claude Code, an AI assistant, to fix the train/test split and a neural-network scaling bug, reorganize the code, write the automated tests, write `performance_score.py`, `split_comparison.py` and `salary_model.py`, build the Streamlit app's player view, and help edit this README. Every number in this README comes from the outputs in this repo.
+**AI note:** I built the original models, ran the experiments, and found the data leakage myself. Later I used Claude Code, an AI assistant, to fix the train/test split and a neural-network scaling bug, reorganize the code, write the automated tests, write `performance_score.py`, `split_comparison.py`, `salary_model.py`, `flags.py` and `scout.py`, build the Streamlit app's player view, scouting flags and "Scout a new player" verdict view, and help edit this README. Every number in this README comes from the outputs in this repo.
 
 ## License
 
