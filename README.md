@@ -1,5 +1,7 @@
 # Predicting Soccer Player Salaries
 
+[![tests](https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries/actions/workflows/tests.yml/badge.svg)](https://github.com/NeilKapoor2/Predicting-Soccer-Player-Salaries/actions/workflows/tests.yml)
+
 **I trained a model to predict MLS salaries and got an R² of 0.99. Then I figured out it was cheating.**
 
 **The short version:** I trained models to predict soccer salaries and got 99% accuracy, then found the model was cheating with a column that was nearly the answer. Removing it showed that salary tracks contracts and negotiation more than skill, so I'm now trying to measure players without using pay.
@@ -72,6 +74,7 @@ The biggest misses are fun, though. The model thought Virgil van Dijk (paid abou
 | `data.py` | Shared code: loads both datasets and splits them by player, so every project prepares data the same way |
 | `evaluation.py` | Shared code: error measures in dollars (MAE, RMSE, MSE) and R², and the results tables |
 | `leakage_comparison.png` | The chart above (made by the Project 1 script and notebook) |
+| `tests/` | Automated checks that run on every push (see "Tests") |
 | `requirements.txt` | Python libraries, with the exact versions I ran |
 | `dfAll.csv` | Reference copy of the Kaggle file Projects 2 and 3 use (the scripts download it themselves with `kagglehub`) |
 
@@ -92,6 +95,21 @@ python split_comparison.py
 ```
 
 Or open the notebooks in Jupyter or Google Colab (Runtime > Run all). The scripts download the data with `kagglehub`, so you may need to be logged in to Kaggle the first time. I ran everything on Python 3.11 with the versions in `requirements.txt`. Run top to bottom, each notebook and its script printed identical results on my machine. Another machine (or a different number of CPU threads) can shift results in the 4th or 5th digit. Each run takes a few minutes; if a run seems stuck, run one script at a time.
+
+## Tests
+
+Some of this project's claims depend on rules that are easy to break by accident, so they are checked automatically on every push with GitHub Actions:
+- No player is ever in both the training and test sets, in either project.
+- The performance score is exactly the same if salary is removed or scrambled, so it really never sees pay.
+- The saved `performance_score_results.csv` still matches what the code produces.
+- The error measures behave as described (for example, predicting the average gives R² = 0).
+
+The tests use `dfAll.csv`, so they don't need a Kaggle login. To run them yourself:
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
 
 ## What I'd claim, and what I wouldn't
 
@@ -129,7 +147,7 @@ Next I want to improve the performance score with defensive stats and position-s
 
 ## AI note
 
-AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
+AI note: I wrote the original code and ran the original experiments myself. For this revision I used Claude Code, an AI assistant, to fix the train/test split, the meta-network bug and the reproducibility issues, to write `performance_score.py` and `split_comparison.py`, to reorganize the scripts into shared modules (`data.py`, `evaluation.py`) without changing any results, to write the automated tests and GitHub Actions setup, and to help draft and edit this README. Every number in this README comes from the notebook and script outputs in this repo.
 
 ## License
 
