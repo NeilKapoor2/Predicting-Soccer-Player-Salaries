@@ -1,0 +1,30 @@
+# "Scouting terminal" theme, matching the Fair Wage design sample:
+# deep green pitch-at-night background, chalk text, gold accent.
+[theme]
+base = "dark"
+primaryColor = "#E8B84B"             # gold
+backgroundColor = "#0C1A17"          # ink
+secondaryBackgroundColor = "#122420" # panel
+textColor = "#EAF1EA"                # chalk
+borderColor = "#254339"              # line
+dataframeBorderColor = "#254339"
+dataframeHeaderBackgroundColor = "#1B322B"
+linkColor = "#E8B84B"
+greenColor = "#46D08A"
+redColor = "#F2706F"
+grayColor = "#7F9A8D"                # muted
+blueColor = "#B7C7BD"                # info boxes: soft chalk-green
+yellowColor = "#E8B84B"              # warnings: gold
+baseRadius = "12px"
+buttonRadius = "999px"
+showWidgetBorder = true
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap, sans-serif"
+headingFont = "Barlow Condensed:https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap, sans-serif"
+codeFont = "Space Mono:https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap, monospace"
+headingFontWeights = 700
+chartCategoricalColors = ["#E8B84B", "#46D08A", "#F2706F", "#B7C7BD"]
+
+[theme.sidebar]
+backgroundColor = "#122420"
+secondaryBackgroundColor = "#0C1A17"
+borderColor = "#254339"
